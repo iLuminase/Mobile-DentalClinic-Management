@@ -1,0 +1,61 @@
+name: dental_clinic_app
+description: A dental clinic management mobile application
+
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State management
+  provider: ^6.0.5
+  
+  # HTTP client
+  http: ^1.1.0
+  
+  # JSON serialization
+  json_annotation: ^4.8.1
+  
+  # Local storage
+  shared_preferences: ^2.2.2
+  
+  # Date/time utilities
+  intl: ^0.18.1
+  
+  # UI components
+  flutter_localizations:
+    sdk: flutter
+  
+  # Icons
+  cupertino_icons: ^1.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  # Code generation
+  json_serializable: ^6.7.1
+  build_runner: ^2.4.7
+  
+  # Linting
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  
+  # Assets
+  assets:
+    - assets/images/
+    - assets/icons/
+  
+  # Fonts
+  fonts:
+    - family: Schyler
+      fonts:
+        - asset: fonts/Schyler-Regular.ttf
+        - asset: fonts/Schyler-Italic.ttf
+          style: italic

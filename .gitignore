@@ -1,0 +1,67 @@
+# Backend (Java/Maven)
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+backend/*.iml
+backend/.idea/
+backend/.vscode/
+backend/.classpath
+backend/.project
+backend/.settings/
+
+# Frontend (Flutter)
+frontend/dental_clinic_app/.dart_tool/
+frontend/dental_clinic_app/.flutter-plugins
+frontend/dental_clinic_app/.flutter-plugins-dependencies
+frontend/dental_clinic_app/.packages
+frontend/dental_clinic_app/.pub-cache/
+frontend/dental_clinic_app/.pub/
+frontend/dental_clinic_app/build/
+frontend/dental_clinic_app/ios/Pods/
+frontend/dental_clinic_app/ios/.symlinks/
+frontend/dental_clinic_app/ios/Flutter/Flutter.framework
+frontend/dental_clinic_app/ios/Flutter/Flutter.podspec
+frontend/dental_clinic_app/ios/Runner.xcworkspace/
+
+# Android
+frontend/dental_clinic_app/android/.gradle/
+frontend/dental_clinic_app/android/captures/
+frontend/dental_clinic_app/android/gradlew
+frontend/dental_clinic_app/android/gradlew.bat
+frontend/dental_clinic_app/android/local.properties
+frontend/dental_clinic_app/android/**/GeneratedPluginRegistrant.java
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Database
+*.db
+*.sqlite
+
+# Temporary files
+tmp/
+temp/
