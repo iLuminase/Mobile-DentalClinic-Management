@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦷 Dental Clinic API - Test Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1em;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #48bb78;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .card h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            font-size: 1.3em;
+        }
+
+        .card h3::before {
+            content: "🔗";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin: 5px 10px 5px 0;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-test {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        }
+
+        .api-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .api-section h3 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .api-item {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .api-method {
+            font-weight: bold;
+            color: #667eea;
+            margin-right: 10px;
+        }
+
+        .api-url {
+            color: #4a5568;
+            font-family: 'Courier New', monospace;
+            background: #e2e8f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+
+        .test-form {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .response {
+            background: #1a202c;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .footer {
+            text-align: center;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            color: #718096;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🦷 Dental Clinic Management API</h1>
+            <p>Hệ thống quản lý phòng khám nha khoa - API Testing Interface</p>
+            <div class="status">
+                <div class="status-dot"></div>
+                <span id="status-text">Đang kiểm tra kết nối...</span>
+            </div>
+        </div>
+
+        <!-- Quick Access Cards -->
+        <div class="cards">
+            <div class="card">
+                <h3>🔧 API Documentation</h3>
+                <p>Truy cập Swagger UI để xem chi tiết tất cả các API endpoints</p>
+                <a href="/swagger-ui.html" class="btn" target="_blank">Mở Swagger UI</a>
+            </div>
+
+            <div class="card">
+                <h3>🗄️ Database Console</h3>
+                <p>Truy cập H2 Database Console để xem dữ liệu</p>
+                <a href="/h2-console" class="btn btn-secondary" target="_blank">Mở H2 Console</a>
+                <div style="margin-top: 10px; font-size: 0.9em; color: #718096;">
+                    <strong>JDBC URL:</strong> jdbc:h2:mem:dental_clinic_db<br>
+                    <strong>Username:</strong> sa<br>
+                    <strong>Password:</strong> (để trống)
+                </div>
+            </div>
+        </div>
+
+        <!-- API Testing Section -->
+        <div class="api-section">
+            <h3>🚀 Quick API Tests</h3>
+
+            <!-- Health Check -->
+            <div class="api-item">
+                <span class="api-method">GET</span>
+                <span>Health Check</span>
+                <span class="api-url">/api/public/health</span>
+                <button class="btn btn-test" onclick="testHealthCheck()">Test API</button>
+                <div id="health-response" class="response hidden"></div>
+            </div>
+
+            <!-- API Info -->
+            <div class="api-item">
+                <span class="api-method">GET</span>
+                <span>API Information</span>
+                <span class="api-url">/api/public/info</span>
+                <button class="btn btn-test" onclick="testApiInfo()">Test API</button>
+                <div id="info-response" class="response hidden"></div>
+            </div>
+        </div>
+
+        <!-- Authentication Testing -->
+        <div class="api-section">
+            <h3>🔐 Authentication Testing</h3>
+
+            <!-- Login Test -->
+            <div class="api-item">
+                <span class="api-method">POST</span>
+                <span>User Login</span>
+                <span class="api-url">/api/auth/login</span>
+                <button class="btn btn-test" onclick="toggleLoginForm()">Test Login</button>
+
+                <div id="login-form" class="test-form hidden">
+                    <div class="form-group">
+                        <label>Username:</label>
+                        <input type="text" id="login-username" value="admin" placeholder="Enter username">
+                    </div>
+                    <div class="form-group">
+                        <label>Password:</label>
+                        <input type="password" id="login-password" value="admin123" placeholder="Enter password">
+                    </div>
+                    <button class="btn btn-test" onclick="testLogin()">Đăng nhập</button>
+                    <div style="margin-top: 10px; font-size: 0.9em; color: #718096;">
+                        <strong>Tài khoản có sẵn:</strong><br>
+                        • admin / admin123 (Admin)<br>
+                        • doctor1 / doctor123 (Doctor)<br>
+                        • receptionist / reception123 (Receptionist)
+                    </div>
+                </div>
+                <div id="login-response" class="response hidden"></div>
+            </div>
+
+            <!-- Register Test -->
+            <div class="api-item">
+                <span class="api-method">POST</span>
+                <span>User Registration</span>
+                <span class="api-url">/api/auth/register</span>
+                <button class="btn btn-test" onclick="toggleRegisterForm()">Test Register</button>
+
+                <div id="register-form" class="test-form hidden">
+                    <div class="form-group">
+                        <label>Username:</label>
+                        <input type="text" id="register-username" placeholder="Enter new username">
+                    </div>
+                    <div class="form-group">
+                        <label>Password:</label>
+                        <input type="password" id="register-password" placeholder="Enter password">
+                    </div>
+                    <div class="form-group">
+                        <label>Full Name:</label>
+                        <input type="text" id="register-fullname" placeholder="Enter full name">
+                    </div>
+                    <div class="form-group">
+                        <label>Role:</label>
+                        <input type="text" id="register-role" value="ROLE_USER" placeholder="ROLE_USER, ROLE_DOCTOR, etc.">
+                    </div>
+                    <button class="btn btn-test" onclick="testRegister()">Đăng ký</button>
+                </div>
+                <div id="register-response" class="response hidden"></div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>🦷 Dental Clinic Management System API v1.0.0</p>
+            <p>Built with Spring Boot, H2 Database, and Swagger UI</p>
+            <p>Timezone: UTC+7 (Vietnam)</p>
+        </div>
+    </div>
+
+    <script>
+        // Check API status on load
+        window.onload = function() {
+            testHealthCheck();
+        };
+
+        // Health Check Test
+        async function testHealthCheck() {
+            try {
+                const response = await fetch('/api/public/health');
+                const data = await response.json();
+                document.getElementById('health-response').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('health-response').classList.remove('hidden');
+
+                if (response.ok) {
+                    document.getElementById('status-text').textContent = 'API đang hoạt động tốt ✅';
+                }
+            } catch (error) {
+                document.getElementById('health-response').textContent = 'Error: ' + error.message;
+                document.getElementById('health-response').classList.remove('hidden');
+                document.getElementById('status-text').textContent = 'API không khả dụng ❌';
+            }
+        }
+
+        // API Info Test
+        async function testApiInfo() {
+            try {
+                const response = await fetch('/api/public/info');
+                const data = await response.json();
+                document.getElementById('info-response').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('info-response').classList.remove('hidden');
+            } catch (error) {
+                document.getElementById('info-response').textContent = 'Error: ' + error.message;
+                document.getElementById('info-response').classList.remove('hidden');
+            }
+        }
+
+        // Toggle Login Form
+        function toggleLoginForm() {
+            const form = document.getElementById('login-form');
+            form.classList.toggle('hidden');
+        }
+
+        // Toggle Register Form
+        function toggleRegisterForm() {
+            const form = document.getElementById('register-form');
+            form.classList.toggle('hidden');
+        }
+
+        // Test Login
+        async function testLogin() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById('login-response').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('login-response').classList.remove('hidden');
+            } catch (error) {
+                document.getElementById('login-response').textContent = 'Error: ' + error.message;
+                document.getElementById('login-response').classList.remove('hidden');
+            }
+        }
+
+        // Test Register
+        async function testRegister() {
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            const fullName = document.getElementById('register-fullname').value;
+            const role = document.getElementById('register-role').value;
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        fullName: fullName,
+                        role: role
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById('register-response').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('register-response').classList.remove('hidden');
+            } catch (error) {
+                document.getElementById('register-response').textContent = 'Error: ' + error.message;
+                document.getElementById('register-response').classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
