@@ -2,10 +2,6 @@ package com.dentalclinic.dentalclinic_api.controller;
 
 import com.dentalclinic.dentalclinic_api.model.User;
 import com.dentalclinic.dentalclinic_api.service.UserService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,7 +15,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@Tag(name = "Authentication", description = "Authentication management APIs")
 public class AuthController {
 
     @Autowired
@@ -51,11 +46,6 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "User login", description = "Authenticate user with username and password")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Login successful"),
-            @ApiResponse(responseCode = "401", description = "Invalid credentials")
-    })
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -82,11 +72,6 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    @Operation(summary = "User registration", description = "Register a new user account")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User registered successfully"),
-            @ApiResponse(responseCode = "400", description = "Registration failed")
-    })
     public ResponseEntity<?> register(@RequestBody User user) {
         try {
             // Set default role if not provided
