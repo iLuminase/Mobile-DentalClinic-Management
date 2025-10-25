@@ -1,18 +1,14 @@
 package com.dentalclinic.dentalclinic_api.config;
 
-import com.dentalclinic.dentalclinic_api.model.User;
-import com.dentalclinic.dentalclinic_api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
+import com.dentalclinic.dentalclinic_api.model.User;
+import com.dentalclinic.dentalclinic_api.repository.UserRepository;
 
-/**
- * Data initialization class for creating default users
- * Runs automatically when the application starts
- */
+
 @Component
 public class DataInitializer implements CommandLineRunner {
 
@@ -35,7 +31,6 @@ public class DataInitializer implements CommandLineRunner {
         User admin = new User();
         admin.setUsername("admin");
         admin.setPassword(passwordEncoder.encode("admin123"));
-        admin.setRole("ROLE_ADMIN");
         admin.setFullName("Administrator");
         admin.setActive(true);
         userRepository.save(admin);
@@ -44,7 +39,6 @@ public class DataInitializer implements CommandLineRunner {
         User doctor = new User();
         doctor.setUsername("doctor1");
         doctor.setPassword(passwordEncoder.encode("doctor123"));
-        doctor.setRole("ROLE_DOCTOR");
         doctor.setFullName("Dr. Nguyen Van A");
         doctor.setActive(true);
         userRepository.save(doctor);
@@ -53,7 +47,6 @@ public class DataInitializer implements CommandLineRunner {
         User receptionist = new User();
         receptionist.setUsername("receptionist");
         receptionist.setPassword(passwordEncoder.encode("reception123"));
-        receptionist.setRole("ROLE_RECEPTIONIST");
         receptionist.setFullName("Le Thi B");
         receptionist.setActive(true);
         userRepository.save(receptionist);
