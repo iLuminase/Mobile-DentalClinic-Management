@@ -8,7 +8,7 @@ Hệ thống quản lý phòng khám nha khoa với JWT Authentication, hỗ tr�
 
 - **Backend**: Java 21, Spring Boot 3.5.6
 - **Security**: JWT (JSON Web Token)
-- **Database**: MSSQL Server (production), H2 (development)
+- **Database**: MSSQL Server
 - **Build Tool**: Maven
 - **ORM**: Hibernate/JPA
 
@@ -26,9 +26,9 @@ Hệ thống quản lý phòng khám nha khoa với JWT Authentication, hỗ tr�
 
 - Java 21 trở lên
 - Maven 3.6+
-- **SQL Server 2019+** (Express, Developer, hoặc Standard) - **Required for production**
+- **SQL Server 2019+** (Express, Developer, hoặc Standard)
 
-### Setup Database MSSQL (Bắt buộc)
+### Setup Database MSSQL
 
 #### Bước 1: Tạo Database
 
@@ -61,38 +61,18 @@ SELECT name FROM sys.databases WHERE name = 'DentalClinicDB';
 
 ### Chạy ứng dụng
 
-#### Môi trường Production (MSSQL Server) - Mặc định
-
 ```bash
-# Chạy với MSSQL (mặc định)
 mvn spring-boot:run
-
-# Hoặc chỉ định rõ profile
-mvn spring-boot:run -Dspring-boot.run.profiles=prod
 ```
 
 Ứng dụng sẽ chạy tại: **http://localhost:8080**
 
 Khi chạy lần đầu, application sẽ **tự động**:
 
-- ✅ Tạo tất cả tables (users, roles, patients, appointments, v.v.)
+- ✅ Tạo tất cả tables (users, roles, patients, appointments, menus, v.v.)
 - ✅ Insert 4 roles (ADMIN, DOCTOR, RECEPTIONIST, VIEWER)
 - ✅ Tạo admin user (username: `admin`, password: `admin123`)
-
-#### Môi trường Development (H2 in-memory)
-
-Nếu muốn test nhanh với H2:
-
-```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
-```
-
-### H2 Console (Development mode only)
-
-- URL: **http://localhost:8080/h2-console**
-- JDBC URL: `jdbc:h2:mem:dentalclinic`
-- Username: `sa`
-- Password: (để trống)
+- ✅ Tạo menu phân quyền (chạy script `insert-menus.sql` trong SSMS)
 
 ## 🔐 Tài khoản mặc định
 
@@ -463,10 +443,6 @@ curl -X POST http://localhost:8080/api/users \
 - **Check application logs:** Luôn xem logs khi có lỗi
 - **Verify connection:** Dùng SSMS để test connection trước
 - **Check credentials:** Username/password trong `application.yml` phải khớp với SQL Server
-- **Use dev profile:** Nếu MSSQL gặp vấn đề, dùng H2 để test:
-  ```bash
-  mvn spring-boot:run -Dspring-boot.run.profiles=dev
-  ```
 
 ## 📚 Tài liệu tham khảo
 

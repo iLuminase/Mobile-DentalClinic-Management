@@ -10,12 +10,6 @@ spring:
     username: sa
     password: admin123
 
-    # Nếu dùng Windows Authentication, thay bằng config này:
-    # url: jdbc:sqlserver://localhost:1433;databaseName=DentalClinicDB;integratedSecurity=true;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true;characterEncoding=UTF-8
-    # username:
-    # password:
-    # Lưu ý: Cần copy sqljdbc_auth.dll vào System32 hoặc thêm vào PATH
-
   # JPA/Hibernate Configuration
   jpa:
     database-platform: org.hibernate.dialect.SQLServerDialect

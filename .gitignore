@@ -35,10 +35,3 @@ build/
 ### Logs ###
 logs/
 *.log
-
-### Application Config ###
-src/main/resources/application-dev.yml
-.env
-
-### Keycloak Data (exclude data directory only) ###
-keycloak/data/
