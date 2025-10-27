@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -51,9 +53,11 @@ public class Menu {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
+    @JsonIgnore // Tránh vòng lặp khi serialize
     private Menu parent; // Menu cha (cho submenu)
 
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+    @JsonIgnore // Tránh vòng lặp khi serialize, dùng MenuResponse.children
     private Set<Menu> children = new HashSet<>(); // Menu con
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -62,6 +66,7 @@ public class Menu {
         joinColumns = @JoinColumn(name = "menu_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+    @JsonIgnore // Không cần expose roles trong API, dùng MenuResponse
     private Set<Role> roles = new HashSet<>(); // Các role có quyền truy cập
 
     @Column(nullable = false)

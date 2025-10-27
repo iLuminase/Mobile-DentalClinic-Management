@@ -1,8 +1,10 @@
 package com.dentalclinic.dentalclinic_api.service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,10 +42,24 @@ public class MenuService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user: " + username));
 
         Set<Role> userRoles = user.getRoles();
-        List<Menu> menus = menuRepository.findByRolesInAndParentIsNull(userRoles);
+        
+        // Lấy TẤT CẢ menu (kể cả submenu) mà user có quyền
+        List<Menu> allMenus = menuRepository.findAllByRolesIn(userRoles);
+        
+        // Build tree: lọc ra menu cha, tìm children cho từng cha
+        Map<Long, List<Menu>> menusByParentId = allMenus.stream()
+                .filter(m -> m.getParent() != null)
+                .collect(Collectors.groupingBy(m -> m.getParent().getId()));
+        
+        // Chỉ lấy menu cha (parent == null)
+        List<Menu> parentMenus = allMenus.stream()
+                .filter(m -> m.getParent() == null)
+                .sorted(Comparator.comparing(Menu::getOrderIndex))
+                .collect(Collectors.toList());
 
-        return menus.stream()
-                .map(this::convertToResponse)
+        // Convert sang DTO và gán children
+        return parentMenus.stream()
+                .map(menu -> convertToResponseWithChildren(menu, menusByParentId))
                 .collect(Collectors.toList());
     }
 
@@ -179,14 +195,50 @@ public class MenuService {
                 .children(new ArrayList<>())
                 .build();
 
-        // Recursively load children
-        if (menu.getChildren() != null && !menu.getChildren().isEmpty()) {
-            List<MenuResponse> children = menu.getChildren().stream()
+        // Recursively load children - dùng try-catch tránh ConcurrentModificationException
+        try {
+            Set<Menu> childrenSet = menu.getChildren();
+            if (childrenSet != null && !childrenSet.isEmpty()) {
+                // Copy sang List mới để tránh ConcurrentModificationException
+                List<Menu> childrenList = new ArrayList<>(childrenSet);
+                List<MenuResponse> children = childrenList.stream()
+                        .filter(Menu::getActive)
+                        .sorted((a, b) -> a.getOrderIndex().compareTo(b.getOrderIndex()))
+                        .map(this::convertToResponse)
+                        .collect(Collectors.toList());
+                response.setChildren(children);
+            }
+        } catch (Exception e) {
+            log.warn("Không thể load children cho menu {}: {}", menu.getName(), e.getMessage());
+            response.setChildren(new ArrayList<>());
+        }
+
+        return response;
+    }
+
+    // Convert entity -> DTO với children từ Map (tránh N+1 query)
+    private MenuResponse convertToResponseWithChildren(Menu menu, Map<Long, List<Menu>> menusByParentId) {
+        MenuResponse response = MenuResponse.builder()
+                .id(menu.getId())
+                .name(menu.getName())
+                .title(menu.getTitle())
+                .path(menu.getPath())
+                .icon(menu.getIcon())
+                .orderIndex(menu.getOrderIndex())
+                .parentId(menu.getParent() != null ? menu.getParent().getId() : null)
+                .active(menu.getActive())
+                .children(new ArrayList<>())
+                .build();
+
+        // Lấy children từ Map (đã được group sẵn)
+        List<Menu> children = menusByParentId.getOrDefault(menu.getId(), new ArrayList<>());
+        if (!children.isEmpty()) {
+            List<MenuResponse> childrenResponses = children.stream()
                     .filter(Menu::getActive)
-                    .sorted((a, b) -> a.getOrderIndex().compareTo(b.getOrderIndex()))
-                    .map(this::convertToResponse)
+                    .sorted(Comparator.comparing(Menu::getOrderIndex))
+                    .map(child -> convertToResponseWithChildren(child, menusByParentId)) // Recursive cho multilevel
                     .collect(Collectors.toList());
-            response.setChildren(children);
+            response.setChildren(childrenResponses);
         }
 
         return response;
