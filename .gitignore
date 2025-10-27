@@ -35,3 +35,49 @@ build/
 ### Logs ###
 logs/
 *.log
+
+### Flutter / Mobile (imported mobile app) ###
+# Dart / Flutter tooling
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+# Flutter build outputs
+mobile/build/
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+mobile/.pub-cache/
+
+# Android
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/android/build/
+mobile/android/local.properties
+
+# iOS
+mobile/ios/Pods/
+mobile/ios/Runner.xcworkspace/
+mobile/ios/Flutter/Flutter.framework
+mobile/ios/Flutter/Flutter.podspec
+mobile/ios/Flutter/engine/Flutter.framework
+
+# macOS
+mobile/macos/Build/
+mobile/macos/Flutter/ephemeral/
+
+# Windows
+mobile/windows/runner/Release/
+mobile/windows/runner/Debug/
+
+# Linux
+mobile/linux/flutter/ephemeral/
+
+# Generated files and IDE
+mobile/.metadata
+mobile/.idea/
+mobile/.vscode/
+
+# Lock files that may be intentionally committed for apps can be left, but ignore local ones
+mobile/pubspec.lock
