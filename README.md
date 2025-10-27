@@ -8,7 +8,7 @@ Hệ thống quản lý phòng khám nha khoa với JWT Authentication, hỗ tr�
 
 - **Backend**: Java 21, Spring Boot 3.5.6
 - **Security**: JWT (JSON Web Token)
-- **Database**: H2 (development), MSSQL (production)
+- **Database**: MSSQL Server (production), H2 (development)
 - **Build Tool**: Maven
 - **ORM**: Hibernate/JPA
 
@@ -26,16 +26,68 @@ Hệ thống quản lý phòng khám nha khoa với JWT Authentication, hỗ tr�
 
 - Java 21 trở lên
 - Maven 3.6+
+- **SQL Server 2019+** (Express, Developer, hoặc Standard) - **Required for production**
+
+### Setup Database MSSQL (Bắt buộc)
+
+#### Bước 1: Tạo Database
+
+**Cách nhanh nhất:** Chạy file SQL script có sẵn
+
+1. Mở **SQL Server Management Studio (SSMS)**
+2. Connect vào SQL Server (server: `localhost` hoặc `.`)
+3. Mở file `setup-database.sql` trong project
+4. Nhấn **F5** để chạy script
+
+Script sẽ tự động:
+
+- ✅ Tạo database `DentalClinicDB`
+- ✅ Tạo/reset login `sa` với password `admin123`
+- ✅ Gán quyền đầy đủ cho user
+
+**Chi tiết:** Xem file [DATABASE_SETUP.md](./DATABASE_SETUP.md) để biết thêm cách setup chi tiết, Windows Authentication, troubleshooting, v.v.
+
+#### Bước 2: Kiểm tra Connection
+
+Sau khi chạy script, kiểm tra:
+
+```sql
+USE DentalClinicDB;
+GO
+
+-- Kiểm tra database đã tạo
+SELECT name FROM sys.databases WHERE name = 'DentalClinicDB';
+```
 
 ### Chạy ứng dụng
 
+#### Môi trường Production (MSSQL Server) - Mặc định
+
 ```bash
+# Chạy với MSSQL (mặc định)
 mvn spring-boot:run
+
+# Hoặc chỉ định rõ profile
+mvn spring-boot:run -Dspring-boot.run.profiles=prod
 ```
 
 Ứng dụng sẽ chạy tại: **http://localhost:8080**
 
-### H2 Console (Development)
+Khi chạy lần đầu, application sẽ **tự động**:
+
+- ✅ Tạo tất cả tables (users, roles, patients, appointments, v.v.)
+- ✅ Insert 4 roles (ADMIN, DOCTOR, RECEPTIONIST, VIEWER)
+- ✅ Tạo admin user (username: `admin`, password: `admin123`)
+
+#### Môi trường Development (H2 in-memory)
+
+Nếu muốn test nhanh với H2:
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+### H2 Console (Development mode only)
 
 - URL: **http://localhost:8080/h2-console**
 - JDBC URL: `jdbc:h2:mem:dentalclinic`
@@ -312,6 +364,114 @@ curl -X POST http://localhost:8080/api/users \
     "active": true
   }'
 ```
+
+## 🔧 Troubleshooting
+
+### ❌ Lỗi: "Cannot connect to SQL Server"
+
+**Nguyên nhân:** SQL Server không chạy hoặc TCP/IP chưa bật
+
+**Giải pháp:**
+
+1. Kiểm tra SQL Server service đang chạy:
+
+   - Mở **Services** (Win + R → `services.msc`)
+   - Tìm "SQL Server" → phải ở trạng thái "Running"
+
+2. Bật TCP/IP trong SQL Server Configuration Manager:
+
+   - Mở **SQL Server Configuration Manager**
+   - SQL Server Network Configuration → Protocols for [Instance]
+   - TCP/IP → Right-click → Enable
+   - Restart SQL Server service
+
+3. Check port 1433 trong Windows Firewall:
+   ```bash
+   netstat -an | findstr 1433
+   ```
+
+### ❌ Lỗi: "Login failed for user 'sa'"
+
+**Nguyên nhân:** SQL Authentication chưa bật hoặc password sai
+
+**Giải pháp:**
+
+1. Bật SQL Server Authentication:
+
+   - Mở SSMS → Connect vào server
+   - Right-click vào Server → Properties
+   - Security → chọn "SQL Server and Windows Authentication mode"
+   - Restart SQL Server service
+
+2. Reset password cho 'sa':
+   - Chạy lại file `setup-database.sql`
+   - Hoặc chạy manual:
+   ```sql
+   ALTER LOGIN sa WITH PASSWORD = 'admin123';
+   ALTER LOGIN sa ENABLE;
+   ```
+
+### ❌ Lỗi: "Cannot open database 'DentalClinicDB'"
+
+**Nguyên nhân:** Database chưa được tạo
+
+**Giải pháp:**
+
+1. Chạy file `setup-database.sql` trong SSMS
+2. Hoặc tạo manual:
+   ```sql
+   CREATE DATABASE DentalClinicDB;
+   ```
+
+### ❌ Lỗi: "Table 'users' doesn't exist"
+
+**Nguyên nhân:** Application chưa tự động tạo tables
+
+**Giải pháp:**
+
+1. Kiểm tra `ddl-auto` trong `application.yml`:
+
+   ```yaml
+   jpa:
+     hibernate:
+       ddl-auto: update # Phải là 'update' hoặc 'create'
+   ```
+
+2. Restart application
+
+3. Check logs để xem lỗi chi tiết
+
+### ❌ Lỗi: "HikariPool - Connection is not available"
+
+**Nguyên nhân:** Connection pool hết kết nối
+
+**Giải pháp:**
+
+1. Tăng connection pool size trong `application-prod.yml`:
+
+   ```yaml
+   datasource:
+     hikari:
+       maximum-pool-size: 20
+       minimum-idle: 10
+   ```
+
+2. Check có connection leaks không (không close connection sau khi dùng)
+
+### 💡 Tips
+
+- **Check application logs:** Luôn xem logs khi có lỗi
+- **Verify connection:** Dùng SSMS để test connection trước
+- **Check credentials:** Username/password trong `application.yml` phải khớp với SQL Server
+- **Use dev profile:** Nếu MSSQL gặp vấn đề, dùng H2 để test:
+  ```bash
+  mvn spring-boot:run -Dspring-boot.run.profiles=dev
+  ```
+
+## 📚 Tài liệu tham khảo
+
+- [DATABASE_SETUP.md](./DATABASE_SETUP.md) - Hướng dẫn chi tiết setup MSSQL
+- [setup-database.sql](./setup-database.sql) - SQL script tự động setup database
 
 ## 📝 Next Steps (Phase 2-4)
 
