@@ -1,4 +1,4 @@
-package com.dentalclinic.dentalclinic_api.model;
+package com.dentalclinic.dentalclinic_api.entity;
 
 import java.time.LocalDateTime;
 
@@ -7,8 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -17,42 +15,33 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Branch entity representing dental clinic branches
+ * Entity representing user roles in the system.
+ * Supports many-to-many relationship with User.
  */
 @Entity
-@Table(name = "branches")
+@Table(name = "roles")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Branch {
+public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 255)
-    private String name;
+    @Column(unique = true, nullable = false, length = 50)
+    private String name; // ROLE_ADMIN, ROLE_DOCTOR, ROLE_RECEPTIONIST
 
-    @Column(length = 500)
-    private String address;
+    @Column(length = 255)
+    private String description;
 
-    @Column(length = 20)
-    private String phone;
+    @Column(nullable = false)
+    private Boolean active = true;
 
-    @Column(length = 100)
-    private String email;
-
-    @ManyToOne
-    @JoinColumn(name = "manager_id")
-    private User manager;
-
-    @Column(name = "is_active", nullable = false)
-    private boolean active = true;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     @PrePersist
