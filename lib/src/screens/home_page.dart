@@ -1,12 +1,13 @@
 
-import 'package:doanmobile/src/screens/main_app/booking_screen.dart';
-import 'package:doanmobile/src/screens/main_app/dashboard_screen.dart';
-import 'package:doanmobile/src/screens/main_app/invoices_screen.dart';
-import 'package:doanmobile/src/screens/main_app/settings_screen.dart';
-import 'package:doanmobile/src/widgets/main_bottom_navbar.dart';
+import 'package:doanmobile/src/core/providers/auth_provider.dart';
+import 'package:doanmobile/src/screens/admin/menu_management_screen.dart';
+import 'package:doanmobile/src/screens/admin/user_management_screen.dart';
+import 'package:doanmobile/src/screens/placeholder_screen.dart';
+import 'package:doanmobile/src/widgets/main_drawer.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-// Màn hình chính của ứng dụng, quản lý các trang con và thanh điều hướng
+// Trang chủ chính, sử dụng BottomNavigationBar tĩnh và Drawer động
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -15,36 +16,71 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // Index của tab đang được chọn
   int _selectedIndex = 0;
+  final PageController _pageController = PageController();
 
-  // Danh sách các trang (widget) tương ứng với mỗi tab
-  static const List<Widget> _widgetOptions = <Widget>[
-    DashboardScreen(),
-    BookingScreen(),
-    InvoicesScreen(),
-    SettingsScreen(),
+  // Danh sách các trang CỐ ĐỊNH cho BottomNavigationBar
+  final List<Widget> _staticPages = [
+    const PlaceholderScreen(route: '/dashboard'), // Trang tổng quan
+    const PlaceholderScreen(route: '/appointments'), // Trang lịch hẹn
+    const UserManagementScreen(), // Trang quản lý User (ví dụ)
+    const MenuManagementScreen(), // Trang cài đặt (ví dụ)
   ];
 
-  // Hàm được gọi khi người dùng chọn một tab, cập nhật lại trạng thái
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      _pageController.jumpToPage(index); // Chuyển trang
     });
   }
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Lấy tiêu đề cho AppBar
+    final List<String> pageTitles = ['Tổng quan', 'Lịch hẹn', 'Người dùng', 'Cài đặt'];
+
     return Scaffold(
-      // Body sẽ hiển thị trang tương ứng với tab được chọn
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _widgetOptions,
+      appBar: AppBar(
+        title: Text(pageTitles[_selectedIndex]),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => Provider.of<AuthProvider>(context, listen: false).logout(),
+          )
+        ],
       ),
-      // Sử dụng widget BottomNavigationBar
-      bottomNavigationBar: MainBottomNavbar(
+      // Drawer sẽ chứa menu động từ API
+      drawer: MainDrawer(onMenuSelected: (route) {
+        // TODO: Xử lý điều hướng từ Drawer nếu cần
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Điều hướng tới $route")));
+      }),
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        children: _staticPages,
+      ),
+      // BottomNavigationBar tĩnh, luôn hiển thị
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Tổng quan'),
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Lịch hẹn'),
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Người dùng'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Cài đặt'),
+        ],
       ),
     );
   }
