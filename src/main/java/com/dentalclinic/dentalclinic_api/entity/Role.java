@@ -14,10 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Entity representing user roles in the system.
- * Supports many-to-many relationship with User.
- */
+// Entity Role: ROLE_ADMIN, ROLE_DOCTOR, ROLE_RECEPTIONIST, ROLE_VIEWER
 @Entity
 @Table(name = "roles")
 @Data
@@ -30,7 +27,7 @@ public class Role {
     private Long id;
 
     @Column(unique = true, nullable = false, length = 50)
-    private String name; // ROLE_ADMIN, ROLE_DOCTOR, ROLE_RECEPTIONIST
+    private String name;
 
     @Column(length = 255)
     private String description;

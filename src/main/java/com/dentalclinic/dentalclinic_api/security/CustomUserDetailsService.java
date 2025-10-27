@@ -15,9 +15,7 @@ import com.dentalclinic.dentalclinic_api.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
-/**
- * Custom UserDetailsService implementation for loading user data.
- */
+// Service load user để xác thực
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
@@ -27,26 +25,21 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy user: " + username));
 
         if (!user.getActive()) {
-            throw new UsernameNotFoundException("User is inactive: " + username);
+            throw new UsernameNotFoundException("User không hoạt động: " + username);
         }
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
                 user.getActive(),
-                true, // accountNonExpired
-                true, // credentialsNonExpired
-                true, // accountNonLocked
+                true, true, true,
                 getAuthorities(user)
         );
     }
 
-    /**
-     * Convert user roles to Spring Security authorities.
-     */
     private Collection<? extends GrantedAuthority> getAuthorities(User user) {
         return user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName()))

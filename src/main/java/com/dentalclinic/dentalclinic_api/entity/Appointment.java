@@ -19,13 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Entity representing dental clinic appointments.
- * Business rules:
- * - Each appointment is 30 minutes by default
- * - Check for doctor time conflicts
- * - Patient must complete previous appointment before booking new one
- */
+// Entity Appointment: lịch hẹn khám (mặc định 30 phút, kiểm tra xung đột lịch bác sĩ)
 @Entity
 @Table(name = "appointments")
 @Data
@@ -43,30 +37,30 @@ public class Appointment {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "doctor_id", nullable = false)
-    private User doctor; // User with ROLE_DOCTOR
+    private User doctor;
 
     @Column(nullable = false)
-    private LocalDateTime appointmentDateTime; // Ngày giờ bắt đầu
+    private LocalDateTime appointmentDateTime;
 
     @Column(nullable = false)
-    private Integer durationMinutes = 30; // Thời lượng dự kiến (mặc định 30 phút)
+    private Integer durationMinutes = 30;
 
     @Column
-    private LocalDateTime actualEndTime; // Thời gian kết thúc thực tế (có thể sớm hơn)
+    private LocalDateTime actualEndTime;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private AppointmentStatus status = AppointmentStatus.PENDING;
 
     @Column(columnDefinition = "TEXT")
-    private String notes; // Ghi chú từ lễ tân hoặc bệnh nhân
+    private String notes;
 
     @Column(columnDefinition = "TEXT")
-    private String reason; // Lý do khám
+    private String reason;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_user_id")
-    private User createdBy; // RECEPTIONIST or ADMIN who created this appointment
+    private User createdBy;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

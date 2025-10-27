@@ -5,9 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-/**
- * DTO for user registration request.
- */
+// DTO đăng ký tài khoản
 @Data
 public class RegisterRequest {
     

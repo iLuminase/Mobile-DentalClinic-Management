@@ -17,11 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Entity representing patients in the dental clinic.
- * Patients are data records only and do NOT have login credentials.
- * Created and managed by RECEPTIONIST or ADMIN.
- */
+// Entity Patient: bệnh nhân (không có quyền đăng nhập)
 @Entity
 @Table(name = "patients")
 @Data
@@ -49,10 +45,10 @@ public class Patient {
     private String address;
 
     @Column(columnDefinition = "TEXT")
-    private String medicalHistory; // Tiền sử bệnh
+    private String medicalHistory;
 
     @Column(columnDefinition = "TEXT")
-    private String allergies; // Dị ứng
+    private String allergies;
 
     @Column(length = 100)
     private String emergencyContactName;
@@ -62,7 +58,7 @@ public class Patient {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_user_id")
-    private User createdBy; // RECEPTIONIST or ADMIN who created this patient
+    private User createdBy;
 
     @Column(nullable = false)
     private Boolean active = true;
