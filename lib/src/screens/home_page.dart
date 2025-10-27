@@ -2,6 +2,10 @@
 import 'package:doanmobile/src/core/providers/auth_provider.dart';
 import 'package:doanmobile/src/screens/admin/menu_management_screen.dart';
 import 'package:doanmobile/src/screens/admin/user_management_screen.dart';
+import 'package:doanmobile/src/screens/main_app/appointment_screen.dart';
+import 'package:doanmobile/src/screens/main_app/invoice_screen.dart';
+import 'package:doanmobile/src/screens/main_app/payment_screen.dart';
+import 'package:doanmobile/src/screens/main_app/settings_screen.dart';
 import 'package:doanmobile/src/screens/placeholder_screen.dart';
 import 'package:doanmobile/src/widgets/main_drawer.dart';
 import 'package:flutter/material.dart';
@@ -21,11 +25,13 @@ class _HomePageState extends State<HomePage> {
 
   // Danh sách các trang CỐ ĐỊNH cho BottomNavigationBar
   final List<Widget> _staticPages = [
-    const PlaceholderScreen(route: '/dashboard'), // Trang tổng quan
-    const PlaceholderScreen(route: '/appointments'), // Trang lịch hẹn
-    const UserManagementScreen(), // Trang quản lý User (ví dụ)
-    const MenuManagementScreen(), // Trang cài đặt (ví dụ)
+    const AppointmentScreen(),
+    const PaymentScreen(),
+    const InvoiceScreen(),
+    const SettingsScreen(), // hoặc giữ nguyên MenuManagementScreen
   ];
+
+  final List<String> pageTitles = ['Lịch hẹn', 'Thanh toán', 'Hóa đơn', 'Cài đặt'];
 
   void _onItemTapped(int index) {
     setState(() {
