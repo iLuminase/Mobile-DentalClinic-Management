@@ -49,13 +49,13 @@ public class Appointment {
     private LocalDateTime actualEndTime;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 20, columnDefinition = "NVARCHAR(20)")
     private AppointmentStatus status = AppointmentStatus.PENDING;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String notes;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String reason;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -13,6 +13,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -20,46 +22,47 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-// Entity User: ADMIN, DOCTOR, RECEPTIONIST
+// Entity Menu: menu items trong hệ thống
 @Entity
-@Table(name = "users")
+@Table(name = "menus")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Menu {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 50, columnDefinition = "NVARCHAR(50)")
-    private String username;
+    @Column(nullable = false, length = 100, columnDefinition = "NVARCHAR(100)")
+    private String name; // Tên menu
 
-    @Column(nullable = false)
-    private String password; // BCrypt hashed
-
-    @Column(unique = true, nullable = false, length = 100, columnDefinition = "NVARCHAR(100)")
-    private String email;
-
-    @Column(length = 100, columnDefinition = "NVARCHAR(100)")
-    private String fullName;
-
-    @Column(length = 20, columnDefinition = "NVARCHAR(20)")
-    private String phoneNumber;
-
-    @Column
-    private LocalDateTime dateOfBirth;
+    @Column(nullable = false, length = 100, columnDefinition = "NVARCHAR(100)")
+    private String title; // Tiêu đề hiển thị
 
     @Column(length = 255, columnDefinition = "NVARCHAR(255)")
-    private String address;
+    private String path; // URL path (/users, /patients, ...)
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @Column(length = 50, columnDefinition = "NVARCHAR(50)")
+    private String icon; // Icon name (material-ui, font-awesome, ...)
+
+    @Column(nullable = false)
+    private Integer orderIndex = 0; // Thứ tự hiển thị
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Menu parent; // Menu cha (cho submenu)
+
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+    private Set<Menu> children = new HashSet<>(); // Menu con
+
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "user_roles",
-        joinColumns = @JoinColumn(name = "user_id"),
+        name = "menu_roles",
+        joinColumns = @JoinColumn(name = "menu_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles = new HashSet<>();
+    private Set<Role> roles = new HashSet<>(); // Các role có quyền truy cập
 
     @Column(nullable = false)
     private Boolean active = true;
@@ -69,9 +72,6 @@ public class User {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
-
-    @Column
-    private LocalDateTime lastLoginAt;
 
     @PrePersist
     protected void onCreate() {

@@ -1,7 +1,7 @@
 spring:
   # Database Configuration (MSSQL for production)
   datasource:
-    url: jdbc:sqlserver://localhost:1433;databaseName=DentalClinicDB;encrypt=true;trustServerCertificate=true
+    url: jdbc:sqlserver://localhost:1433;databaseName=DentalClinicDB;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true;characterEncoding=UTF-8
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     username: sa
     password: admin123
