@@ -1,9 +1,9 @@
 
 import 'package:doanmobile/src/core/providers/auth_provider.dart';
+import 'package:doanmobile/src/screens/auth/registration_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-// Đổi tên tệp thành login_screen.dart và đặt trong thư mục screens/auth/
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -13,46 +13,45 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController(text: 'admin');
-  final _passwordController = TextEditingController(text: 'admin123');
-  bool _obscureText = true;
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
 
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  // Hàm xử lý đăng nhập, gọi provider
-  Future<void> _login() async {
+  Future<void> _login(AuthProvider authProvider) async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final success = await authProvider.login(
+    
+    // SỬA LỖI: Lấy chuỗi lỗi trả về từ provider
+    final errorMessage = await authProvider.login(
       _usernameController.text,
       _passwordController.text,
     );
 
-    if (!mounted) return;
-
-    if (!success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Đăng nhập thất bại. Vui lòng kiểm tra lại.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+    // Nếu có chuỗi lỗi, hiển thị nó ra.
+    if (errorMessage != null && mounted) {
+      _showErrorDialog(errorMessage);
     }
-    // Nếu thành công, AuthWrapper trong main.dart sẽ tự động điều hướng
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Thông báo'), // Đổi tiêu đề cho thân thiện hơn
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () => Navigator.of(ctx).pop(),
+          )
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Lắng nghe trạng thái loading từ provider
-    final isLoading = context.watch<AuthProvider>().isLoading;
+    final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Đăng nhập')),
@@ -62,30 +61,34 @@ class _LoginScreenState extends State<LoginScreen> {
           key: _formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+            children: <Widget>[
               TextFormField(
                 controller: _usernameController,
                 decoration: const InputDecoration(labelText: 'Tên đăng nhập'),
-                validator: (val) => val!.isEmpty ? 'Vui lòng nhập tên đăng nhập' : null,
+                validator: (value) => value!.isEmpty ? 'Vui lòng nhập tên đăng nhập' : null,
               ),
-              const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
-                obscureText: _obscureText,
-                decoration: InputDecoration(
-                  labelText: 'Mật khẩu',
-                  suffixIcon: IconButton(
-                    icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () => setState(() => _obscureText = !_obscureText),
-                  ),
-                ),
-                 validator: (val) => val!.isEmpty ? 'Vui lòng nhập mật khẩu' : null,
+                decoration: const InputDecoration(labelText: 'Mật khẩu'),
+                obscureText: true,
+                validator: (value) => value!.isEmpty ? 'Vui lòng nhập mật khẩu' : null,
               ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: isLoading ? null : _login,
-                child: isLoading ? const CircularProgressIndicator() : const Text('Đăng nhập'),
-              ),
+              const SizedBox(height: 20),
+              authProvider.isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: () => _login(authProvider),
+                      child: const Text('Đăng nhập'),
+                    ),
+              TextButton(
+                onPressed: () {
+                  authProvider.logout();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const RegistrationScreen()),
+                  );
+                },
+                child: const Text('Chưa có tài khoản? Đăng ký ngay'),
+              )
             ],
           ),
         ),

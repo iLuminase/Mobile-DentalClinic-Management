@@ -35,8 +35,8 @@ public class AuthController {
             AuthResponse response = authService.login(request);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            log.error("Đăng nhập thất bại: {}", request.getUsername(), e);
-            throw new RuntimeException("Tên đăng nhập hoặc mật khẩu không đúng");
+            log.error("Login failed for user: {}", request.getUsername(), e);
+            throw new RuntimeException("Invalid username or password");
         }
     }
 
@@ -47,11 +47,11 @@ public class AuthController {
             AuthResponse response = authService.register(request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            log.error("Đăng ký thất bại: {}", request.getUsername(), e);
+            log.error("Register failed for user: {}", request.getUsername(), e);
             throw e;
         } catch (Exception e) {
-            log.error("Đăng ký thất bại: {}", request.getUsername(), e);
-            throw new RuntimeException("Đăng ký không thành công");
+            log.error("Register failed for user: {}", request.getUsername(), e);
+            throw new RuntimeException("Registration failed");
         }
     }
 
@@ -61,14 +61,14 @@ public class AuthController {
         try {
             String refreshToken = request.get("refreshToken");
             if (refreshToken == null || refreshToken.isEmpty()) {
-                throw new RuntimeException("Refresh token bắt buộc");
+                throw new RuntimeException("Refresh token is required");
             }
             
             AuthResponse response = authService.refreshToken(refreshToken);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            log.error("Refresh token thất bại", e);
-            throw new RuntimeException("Refresh token không hợp lệ");
+            log.error("Refresh token failed", e);
+            throw new RuntimeException("Invalid refresh token");
         }
     }
 

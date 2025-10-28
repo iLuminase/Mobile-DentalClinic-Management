@@ -1,11 +1,13 @@
 # Gemini Flutter Development Instructions
 
 ## Project Overview
+
 You are helping to build the **Dental Clinic Management Mobile App** using **Flutter 3.35.3 + Dart 3.9.2**. This is a mobile frontend that connects to a Spring Boot backend API.
 
 ---
 
 ## 🎯 Your Role
+
 - Write Flutter/Dart code for mobile app screens and features
 - Integrate with REST API endpoints (documented below)
 - Follow Material Design 3 guidelines
@@ -43,13 +45,16 @@ mobile/
 ## 🔌 Backend API Information
 
 ### Base URL
+
 ```
 Local: http://localhost:8080/api
 Production: https://your-domain.com/api
 ```
 
 ### Authentication
+
 All requests (except login/register) require JWT Bearer token:
+
 ```dart
 headers: {
   'Authorization': 'Bearer $accessToken',
@@ -58,6 +63,7 @@ headers: {
 ```
 
 ### Token Storage
+
 ```dart
 // Use flutter_secure_storage for tokens
 final storage = FlutterSecureStorage();
@@ -72,6 +78,7 @@ await storage.write(key: 'refresh_token', value: refreshToken);
 ### 1. Authentication API
 
 #### Login
+
 ```
 POST /api/auth/login
 Body: {
@@ -90,6 +97,7 @@ Response: {
 ```
 
 #### Register
+
 ```
 POST /api/auth/register
 Body: {
@@ -103,6 +111,7 @@ Note: Auto-assigns ROLE_PENDING_USER (needs admin approval)
 ```
 
 #### Refresh Token
+
 ```
 POST /api/auth/refresh
 Body: {
@@ -116,6 +125,7 @@ Response: Same as login
 ### 2. Menu API (For Navigation)
 
 #### Get My Menus (Hierarchy)
+
 ```
 GET /api/menus/me
 Response: [
@@ -141,12 +151,14 @@ Response: [
 ```
 
 #### Get Flat Menu List (For Search)
+
 ```
 GET /api/menus/flat
 Response: Array of menu items (no hierarchy)
 ```
 
 #### Get Breadcrumb
+
 ```
 GET /api/menus/breadcrumb/{menuId}
 Response: [
@@ -156,6 +168,7 @@ Response: [
 ```
 
 #### Get Menu Statistics
+
 ```
 GET /api/menus/stats
 Response: {
@@ -174,6 +187,7 @@ Response: {
 ### 3. User Management API
 
 #### Get All Users (Admin)
+
 ```
 GET /api/users
 Response: [
@@ -191,12 +205,14 @@ Response: [
 ```
 
 #### Get Current User
+
 ```
 GET /api/users/me
 Response: User object
 ```
 
 #### Create User (Admin)
+
 ```
 POST /api/users
 Body: {
@@ -209,12 +225,14 @@ Body: {
 ```
 
 #### Update User
+
 ```
 PUT /api/users/{id}
 Body: Same as create (password optional)
 ```
 
 #### Deactivate/Activate User
+
 ```
 PATCH /api/users/{id}/deactivate
 PATCH /api/users/{id}/activate
@@ -225,6 +243,7 @@ PATCH /api/users/{id}/activate
 ## 🎨 Design Guidelines
 
 ### Theme
+
 ```dart
 ThemeData(
   useMaterial3: true,
@@ -238,6 +257,7 @@ ThemeData(
 ```
 
 ### Colors
+
 - Primary: Blue (#1976D2)
 - Secondary: Light Blue (#64B5F6)
 - Success: Green (#4CAF50)
@@ -245,6 +265,7 @@ ThemeData(
 - Error: Red (#F44336)
 
 ### Typography
+
 - Use Google Fonts: Roboto
 - Support Vietnamese characters (UTF-8)
 - Readable font sizes (body: 14-16sp, title: 18-20sp)
@@ -254,34 +275,35 @@ ThemeData(
 ## 📦 Required Packages
 
 Add to `pubspec.yaml`:
+
 ```yaml
 dependencies:
   flutter:
     sdk: flutter
-  
+
   # State Management
   provider: ^6.1.2
-  
+
   # HTTP & API
   dio: ^5.4.0
   retrofit: ^4.1.0
-  
+
   # Storage
   flutter_secure_storage: ^9.0.0
   shared_preferences: ^2.2.2
-  
+
   # Navigation
   go_router: ^13.0.0
-  
+
   # UI
   flutter_svg: ^2.0.9
   cached_network_image: ^3.3.1
   flutter_spinkit: ^5.2.0
-  
+
   # Utils
   intl: ^0.19.0
   json_annotation: ^4.8.1
-  
+
 dev_dependencies:
   build_runner: ^2.4.8
   json_serializable: ^6.7.1
@@ -293,6 +315,7 @@ dev_dependencies:
 ## 🏗️ Code Templates
 
 ### 1. Model Class Template
+
 ```dart
 import 'package:json_annotation/json_annotation.dart';
 
@@ -350,6 +373,7 @@ Run: `flutter pub run build_runner build`
 ---
 
 ### 2. API Service Template
+
 ```dart
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
@@ -391,6 +415,7 @@ final menuService = MenuService(dio);
 ---
 
 ### 3. Screen Template
+
 ```dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -476,6 +501,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 ---
 
 ### 4. Provider Template
+
 ```dart
 import 'package:flutter/foundation.dart';
 
@@ -512,6 +538,7 @@ class MenuProvider with ChangeNotifier {
 ---
 
 ### 5. Sidebar Menu Widget
+
 ```dart
 class SidebarMenu extends StatelessWidget {
   final List<MenuItem> menus;
@@ -595,19 +622,20 @@ class SidebarMenu extends StatelessWidget {
 ## 🔒 Security Best Practices
 
 ### 1. Token Management
+
 ```dart
 class AuthService {
   final FlutterSecureStorage _storage = FlutterSecureStorage();
-  
+
   Future<void> saveTokens(String access, String refresh) async {
     await _storage.write(key: 'access_token', value: access);
     await _storage.write(key: 'refresh_token', value: refresh);
   }
-  
+
   Future<String?> getAccessToken() async {
     return await _storage.read(key: 'access_token');
   }
-  
+
   Future<void> clearTokens() async {
     await _storage.deleteAll();
   }
@@ -615,6 +643,7 @@ class AuthService {
 ```
 
 ### 2. Error Handling
+
 ```dart
 try {
   final response = await menuService.getMyMenus();
@@ -634,6 +663,7 @@ try {
 ```
 
 ### 3. Input Validation
+
 ```dart
 final _formKey = GlobalKey<FormState>();
 
@@ -655,6 +685,7 @@ TextFormField(
 ## 🌐 Localization (Vietnamese)
 
 ### Date Formatting
+
 ```dart
 import 'package:intl/intl.dart';
 
@@ -670,6 +701,7 @@ String formatDateTime(DateTime date) {
 ```
 
 ### Vietnamese Messages
+
 ```dart
 const messages = {
   'login': 'Đăng nhập',
@@ -695,6 +727,7 @@ const messages = {
 ## 🧪 Testing
 
 ### Unit Test Template
+
 ```dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -728,15 +761,17 @@ void main() {
 ## 📝 Coding Standards
 
 ### 1. Naming Conventions
+
 - Classes: PascalCase (`MenuService`, `DashboardScreen`)
 - Variables: camelCase (`menuList`, `isLoading`)
 - Constants: lowerCamelCase (`kDefaultPadding`)
 - Files: snake_case (`menu_service.dart`, `dashboard_screen.dart`)
 
 ### 2. Comments
+
 ```dart
 /// Fetches menu items for the current user.
-/// 
+///
 /// Returns a list of [MenuItem] objects representing the menu hierarchy.
 /// Throws [DioException] if the API request fails.
 Future<List<MenuItem>> getMyMenus() async {
@@ -745,6 +780,7 @@ Future<List<MenuItem>> getMyMenus() async {
 ```
 
 ### 3. Formatting
+
 - Use `flutter format .` before committing
 - Max line length: 80 characters
 - Use trailing commas for better formatting
@@ -756,36 +792,41 @@ Future<List<MenuItem>> getMyMenus() async {
 When starting a new feature, follow these steps:
 
 1. **Understand the API**
-    - [ ] Read API documentation
-    - [ ] Test endpoints with Postman/curl
-    - [ ] Verify authentication requirements
+
+   - [ ] Read API documentation
+   - [ ] Test endpoints with Postman/curl
+   - [ ] Verify authentication requirements
 
 2. **Create Models**
-    - [ ] Define data models with json_serializable
-    - [ ] Run build_runner to generate code
-    - [ ] Add unit tests for models
+
+   - [ ] Define data models with json_serializable
+   - [ ] Run build_runner to generate code
+   - [ ] Add unit tests for models
 
 3. **Create Service**
-    - [ ] Define API service with Retrofit
-    - [ ] Add authentication interceptor
-    - [ ] Handle errors properly
+
+   - [ ] Define API service with Retrofit
+   - [ ] Add authentication interceptor
+   - [ ] Handle errors properly
 
 4. **Create Provider**
-    - [ ] Set up state management
-    - [ ] Implement loading/error states
-    - [ ] Add unit tests
+
+   - [ ] Set up state management
+   - [ ] Implement loading/error states
+   - [ ] Add unit tests
 
 5. **Create UI**
-    - [ ] Build screen layout
-    - [ ] Connect to provider
-    - [ ] Add loading/error states
-    - [ ] Test on different screen sizes
+
+   - [ ] Build screen layout
+   - [ ] Connect to provider
+   - [ ] Add loading/error states
+   - [ ] Test on different screen sizes
 
 6. **Test & Polish**
-    - [ ] Test all user flows
-    - [ ] Add input validation
-    - [ ] Improve error messages
-    - [ ] Optimize performance
+   - [ ] Test all user flows
+   - [ ] Add input validation
+   - [ ] Improve error messages
+   - [ ] Optimize performance
 
 ---
 
@@ -802,6 +843,7 @@ When starting a new feature, follow these steps:
 ## 🐛 Common Issues & Solutions
 
 ### Issue: Token expired
+
 ```dart
 dio.interceptors.add(InterceptorsWrapper(
   onError: (error, handler) async {
@@ -831,7 +873,9 @@ dio.interceptors.add(InterceptorsWrapper(
 ```
 
 ### Issue: Circular progress showing forever
+
 Always wrap async operations in try-catch and set loading state in finally:
+
 ```dart
 Future<void> loadData() async {
   setState(() => _isLoading = true);
@@ -850,6 +894,7 @@ Future<void> loadData() async {
 ## 💬 Communication Tips
 
 When asking for help:
+
 1. Specify which screen/feature you're working on
 2. Provide error messages (full stack trace)
 3. Share relevant code snippets

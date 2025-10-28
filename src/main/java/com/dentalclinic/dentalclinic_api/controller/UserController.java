@@ -98,4 +98,14 @@ public class UserController {
         UserResponse user = userService.assignRoles(id, roleNames);
         return ResponseEntity.ok(user);
     }
+
+    // Cập nhật trạng thái bằng user id
+    @PutMapping("{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponse> updateUserStatus(
+            @PathVariable Long id,
+            @RequestBody Boolean isActive) {
+        UserResponse user = userService.updateUserStatus(id, isActive);
+        return ResponseEntity.ok(user);
+    }
 }

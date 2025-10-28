@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,6 +20,8 @@ import com.dentalclinic.dentalclinic_api.dto.LoginRequest;
 import com.dentalclinic.dentalclinic_api.dto.RegisterRequest;
 import com.dentalclinic.dentalclinic_api.entity.Role;
 import com.dentalclinic.dentalclinic_api.entity.User;
+import com.dentalclinic.dentalclinic_api.enums.RoleEnum;
+import com.dentalclinic.dentalclinic_api.exception.AccountDisabledException;
 import com.dentalclinic.dentalclinic_api.repository.RoleRepository;
 import com.dentalclinic.dentalclinic_api.repository.UserRepository;
 import com.dentalclinic.dentalclinic_api.security.JwtService;
@@ -45,15 +48,32 @@ public class AuthService {
     // Đăng nhập: xác thực và tạo JWT token
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        log.info("Đăng nhập: {}", request.getUsername());
+        log.info("Login attempt: {}", request.getUsername());
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+        // Kiểm tra tài khoản có tồn tại và có bị vô hiệu hóa không trước khi authenticate
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("Tên đăng nhập hoặc mật khẩu không đúng"));
+
+        if (!user.getActive()) {
+            log.warn("Disabled account login attempt: {}", request.getUsername());
+            throw new AccountDisabledException(
+                user.getUsername(), 
+                "Vui lòng liên hệ quản trị viên để được hỗ trợ."
+            );
+        }
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
+        } catch (DisabledException e) {
+            throw new AccountDisabledException(
+                request.getUsername(), 
+                "Vui lòng liên hệ quản trị viên để được hỗ trợ."
+            );
+        }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
 
         user.setLastLoginAt(LocalDateTime.now());
         userRepository.save(user);
@@ -61,7 +81,7 @@ public class AuthService {
         String accessToken = jwtService.generateToken(userDetails);
         String refreshToken = jwtService.generateRefreshToken(userDetails);
 
-        log.info("Đăng nhập thành công: {}", request.getUsername());
+        log.info("Login successful: {}", request.getUsername());
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
@@ -79,9 +99,22 @@ public class AuthService {
 
     // Làm mới access token
     public AuthResponse refreshToken(String refreshToken) {
-        log.info("Làm mới token");
+        log.info("Refreshing token");
 
         String username = jwtService.extractUsername(refreshToken);
+        
+        // Kiểm tra tài khoản có bị vô hiệu hóa không trước khi refresh
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+
+        if (!user.getActive()) {
+            log.warn("Disabled account refresh token attempt: {}", username);
+            throw new AccountDisabledException(
+                username, 
+                "Vui lòng liên hệ quản trị viên để được hỗ trợ."
+            );
+        }
+
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         if (!jwtService.isTokenValid(refreshToken, userDetails)) {
@@ -89,8 +122,6 @@ public class AuthService {
         }
 
         String newAccessToken = jwtService.generateToken(userDetails);
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
 
         return AuthResponse.builder()
                 .accessToken(newAccessToken)
@@ -106,10 +137,10 @@ public class AuthService {
                 .build();
     }
 
-    // Đăng ký user mới (mặc định ROLE_VIEWER)
+    // Đăng ký user mới (mặc định ROLE_PENDING_USER)
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        log.info("Đăng ký: {}", request.getUsername());
+        log.info("Register attempt: {}", request.getUsername());
 
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username đã tồn tại");
@@ -119,8 +150,9 @@ public class AuthService {
             throw new RuntimeException("Email đã được sử dụng");
         }
 
-        Role viewerRole = roleRepository.findByName("ROLE_VIEWER")
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy role mặc định"));
+        // Use default role from enum: ROLE_PENDING_USER
+        Role pendingUserRole = roleRepository.findByName(RoleEnum.getDefaultRole().getRoleName())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy role mặc định: " + RoleEnum.getDefaultRole().getRoleName()));
 
         User newUser = new User();
         newUser.setUsername(request.getUsername());
@@ -131,11 +163,11 @@ public class AuthService {
         newUser.setActive(true);
 
         Set<Role> roles = new HashSet<>();
-        roles.add(viewerRole);
+        roles.add(pendingUserRole);
         newUser.setRoles(roles);
 
         userRepository.save(newUser);
-        log.info("Đăng ký thành công: {}", request.getUsername());
+        log.info("Register successful: {}", request.getUsername());
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(newUser.getUsername());
         String accessToken = jwtService.generateToken(userDetails);

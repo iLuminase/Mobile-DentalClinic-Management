@@ -1,6 +1,7 @@
 # Menu Management API - Mobile Integration Guide
 
 ## Overview
+
 API quản lý menu theo quyền user với JSON response được tối ưu cho mobile development (Flutter/React Native).
 
 **Base URL**: `http://localhost:8080/api/menus`  
@@ -24,17 +25,20 @@ API quản lý menu theo quyền user với JSON response được tối ưu cho
 ## 🎯 User Endpoints (Authenticated)
 
 ### 1. Get My Menus (Hierarchy)
+
 **Endpoint**: `GET /api/menus/me`  
 **Description**: Lấy menu tree của user hiện tại theo roles  
 **Use case**: Render sidebar menu, navigation drawer
 
 **Request**:
+
 ```bash
 curl -X GET http://localhost:8080/api/menus/me \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 **Response**:
+
 ```json
 [
   {
@@ -177,17 +181,20 @@ curl -X GET http://localhost:8080/api/menus/me \
 ---
 
 ### 2. Get My Menus (Flat List)
+
 **Endpoint**: `GET /api/menus/flat`  
 **Description**: Lấy tất cả menu của user dạng flat list (không có hierarchy)  
 **Use case**: Search menu, quick access, autocomplete
 
 **Request**:
+
 ```bash
 curl -X GET http://localhost:8080/api/menus/flat \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 **Response**:
+
 ```json
 [
   {
@@ -262,17 +269,20 @@ curl -X GET http://localhost:8080/api/menus/flat \
 ---
 
 ### 3. Get Breadcrumb Path
+
 **Endpoint**: `GET /api/menus/breadcrumb/{id}`  
 **Description**: Lấy đường dẫn từ root menu đến menu cụ thể  
 **Use case**: Hiển thị breadcrumb navigation
 
 **Request**:
+
 ```bash
 curl -X GET http://localhost:8080/api/menus/breadcrumb/22 \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 **Response**:
+
 ```json
 [
   {
@@ -323,6 +333,7 @@ curl -X GET http://localhost:8080/api/menus/breadcrumb/22 \
 ```
 
 **Mobile UI Example** (Flutter):
+
 ```dart
 // Hiển thị breadcrumb
 String breadcrumb = response
@@ -334,17 +345,20 @@ String breadcrumb = response
 ---
 
 ### 4. Get Menu Statistics
+
 **Endpoint**: `GET /api/menus/stats`  
 **Description**: Lấy thống kê menu của user  
 **Use case**: Dashboard, analytics
 
 **Request**:
+
 ```bash
 curl -X GET http://localhost:8080/api/menus/stats \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 **Response**:
+
 ```json
 {
   "totalMenus": 15,
@@ -364,6 +378,7 @@ curl -X GET http://localhost:8080/api/menus/stats \
 ## 🔐 Admin Endpoints
 
 ### 5. Get All Menus
+
 **Endpoint**: `GET /api/menus`  
 **Access**: ROLE_ADMIN  
 **Description**: Lấy tất cả parent menus (không có children)
@@ -371,6 +386,7 @@ curl -X GET http://localhost:8080/api/menus/stats \
 ---
 
 ### 6. Get Full Menu Hierarchy
+
 **Endpoint**: `GET /api/menus/hierarchy`  
 **Access**: ROLE_ADMIN  
 **Description**: Lấy toàn bộ menu tree cho quản lý
@@ -381,35 +397,35 @@ curl -X GET http://localhost:8080/api/menus/stats \
 
 ## 📋 Response Fields Explained
 
-| Field | Type | Description | Example |
-|-------|------|-------------|---------|
-| `id` | Long | Menu ID | 1 |
-| `name` | String | Unique identifier | "users" |
-| `title` | String | Display name (VN) | "Quản lý người dùng" |
-| `path` | String | Route path | "/users" |
-| `icon` | String | Icon name | "people" |
-| `iconType` | String | Icon library type | "material", "fontawesome" |
-| `orderIndex` | Integer | Display order | 1, 2, 3... |
-| `parentId` | Long? | Parent menu ID (null = root) | 2 |
-| `active` | Boolean | Is menu active? | true |
-| `depth` | Integer | Menu depth level | 0, 1, 2... |
-| `hasChildren` | Boolean | Has submenus? | true/false |
-| `roles` | String[] | Required roles | ["ROLE_ADMIN"] |
-| `canView` | Boolean | User can view? | true |
-| `canEdit` | Boolean | User can edit? | true |
-| `canDelete` | Boolean | User can delete? | true |
-| `target` | String | Link target | "_self", "_blank" |
-| `external` | Boolean | Is external link? | false |
-| `componentName` | String | Flutter screen name | "UsersScreen" |
-| `tooltip` | String | Tooltip text | "Quản lý người dùng" |
-| `children` | Array | Submenu items | [] |
-| `description` | String? | Menu description | "Manage users" |
-| `color` | String? | Theme color | "#1976D2" |
-| `badgeCount` | Integer? | Notification badge | 5 |
-| `badgeColor` | String? | Badge color | "red" |
-| `isNew` | Boolean? | Show NEW label? | true |
+| Field           | Type     | Description                  | Example                   |
+| --------------- | -------- | ---------------------------- | ------------------------- |
+| `id`            | Long     | Menu ID                      | 1                         |
+| `name`          | String   | Unique identifier            | "users"                   |
+| `title`         | String   | Display name (VN)            | "Quản lý người dùng"      |
+| `path`          | String   | Route path                   | "/users"                  |
+| `icon`          | String   | Icon name                    | "people"                  |
+| `iconType`      | String   | Icon library type            | "material", "fontawesome" |
+| `orderIndex`    | Integer  | Display order                | 1, 2, 3...                |
+| `parentId`      | Long?    | Parent menu ID (null = root) | 2                         |
+| `active`        | Boolean  | Is menu active?              | true                      |
+| `depth`         | Integer  | Menu depth level             | 0, 1, 2...                |
+| `hasChildren`   | Boolean  | Has submenus?                | true/false                |
+| `roles`         | String[] | Required roles               | ["ROLE_ADMIN"]            |
+| `canView`       | Boolean  | User can view?               | true                      |
+| `canEdit`       | Boolean  | User can edit?               | true                      |
+| `canDelete`     | Boolean  | User can delete?             | true                      |
+| `target`        | String   | Link target                  | "\_self", "\_blank"       |
+| `external`      | Boolean  | Is external link?            | false                     |
+| `componentName` | String   | Flutter screen name          | "UsersScreen"             |
+| `tooltip`       | String   | Tooltip text                 | "Quản lý người dùng"      |
+| `children`      | Array    | Submenu items                | []                        |
+| `description`   | String?  | Menu description             | "Manage users"            |
+| `color`         | String?  | Theme color                  | "#1976D2"                 |
+| `badgeCount`    | Integer? | Notification badge           | 5                         |
+| `badgeColor`    | String?  | Badge color                  | "red"                     |
+| `isNew`         | Boolean? | Show NEW label?              | true                      |
 
-*Fields with `?` are optional and only returned when they have values*
+_Fields with `?` are optional and only returned when they have values_
 
 ---
 
@@ -427,7 +443,7 @@ class MenuItem {
   final String path;
   final String icon;
   final List<MenuItem> children;
-  
+
   MenuItem.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         name = json['name'],
@@ -560,6 +576,7 @@ Widget buildActionButton(MenuItem menu) {
 ```
 
 Flutter usage:
+
 ```dart
 Badge(
   label: Text('${menu.badgeCount}'),
@@ -580,6 +597,7 @@ Badge(
 ```
 
 Flutter usage:
+
 ```dart
 ListTile(
   leading: Icon(
@@ -614,6 +632,7 @@ Mobile App
 ## 🚀 Best Practices
 
 ### 1. Cache Menu Data
+
 ```dart
 class MenuService {
   List<MenuItem>? _cachedMenus;
@@ -621,8 +640,8 @@ class MenuService {
   final Duration cacheDuration = Duration(hours: 1);
 
   Future<List<MenuItem>> getMenus({bool forceRefresh = false}) async {
-    if (!forceRefresh && 
-        _cachedMenus != null && 
+    if (!forceRefresh &&
+        _cachedMenus != null &&
         _cacheTime != null &&
         DateTime.now().difference(_cacheTime!) < cacheDuration) {
       return _cachedMenus!;
@@ -633,19 +652,20 @@ class MenuService {
         .map((json) => MenuItem.fromJson(json))
         .toList();
     _cacheTime = DateTime.now();
-    
+
     return _cachedMenus!;
   }
 }
 ```
 
 ### 2. Handle Permissions
+
 ```dart
 Widget buildScreen(MenuItem menu) {
   if (!menu.canView) {
     return AccessDeniedScreen();
   }
-  
+
   return YourScreen(
     canEdit: menu.canEdit,
     canDelete: menu.canDelete,
@@ -654,6 +674,7 @@ Widget buildScreen(MenuItem menu) {
 ```
 
 ### 3. Error Handling
+
 ```dart
 try {
   final menus = await menuService.getMenus();

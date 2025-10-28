@@ -13,6 +13,7 @@ import com.dentalclinic.dentalclinic_api.dto.UserRequest;
 import com.dentalclinic.dentalclinic_api.dto.UserResponse;
 import com.dentalclinic.dentalclinic_api.entity.Role;
 import com.dentalclinic.dentalclinic_api.entity.User;
+import com.dentalclinic.dentalclinic_api.enums.RoleEnum;
 import com.dentalclinic.dentalclinic_api.repository.RoleRepository;
 import com.dentalclinic.dentalclinic_api.repository.UserRepository;
 
@@ -96,7 +97,7 @@ public class UserService {
         user.setAddress(request.getAddress());
         user.setActive(request.getActive());
 
-        // Assign roles
+        // Assign roles - if not provided, use default ROLE_PENDING_USER
         if (request.getRoleNames() != null && !request.getRoleNames().isEmpty()) {
             Set<Role> roles = new HashSet<>();
             for (String roleName : request.getRoleNames()) {
@@ -104,6 +105,13 @@ public class UserService {
                         .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
                 roles.add(role);
             }
+            user.setRoles(roles);
+        } else {
+            // Default role: ROLE_PENDING_USER
+            Role defaultRole = roleRepository.findByName(RoleEnum.getDefaultRole().getRoleName())
+                    .orElseThrow(() -> new RuntimeException("Default role not found: " + RoleEnum.getDefaultRole().getRoleName()));
+            Set<Role> roles = new HashSet<>();
+            roles.add(defaultRole);
             user.setRoles(roles);
         }
 
@@ -224,5 +232,15 @@ public class UserService {
                 .updatedAt(user.getUpdatedAt())
                 .lastLoginAt(user.getLastLoginAt())
                 .build();
+    }
+
+    public UserResponse updateUserStatus(Long id, Boolean isActive) {
+        // TODO Auto-generated method stub
+        log.info("Updating status for user ID: {}", id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+        user.setActive(isActive);
+        User updatedUser = userRepository.save(user);
+        return convertToResponse(updatedUser);
     }
 }

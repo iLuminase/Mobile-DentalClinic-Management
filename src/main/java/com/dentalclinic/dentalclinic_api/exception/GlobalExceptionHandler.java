@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -59,6 +60,23 @@ public class GlobalExceptionHandler {
         response.put("message", "Tên đăng nhập hoặc mật khẩu không đúng");
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    /**
+     * Handle account disabled errors.
+     */
+    @ExceptionHandler({DisabledException.class, AccountDisabledException.class})
+    public ResponseEntity<Map<String, Object>> handleAccountDisabledErrors(Exception ex) {
+        log.warn("Account disabled: {}", ex.getMessage());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.FORBIDDEN.value());
+        response.put("error", "Account Disabled");
+        response.put("errorCode", "ACCOUNT_DISABLED");
+        response.put("message", ex.getMessage() != null ? ex.getMessage() : "Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.");
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
     /**

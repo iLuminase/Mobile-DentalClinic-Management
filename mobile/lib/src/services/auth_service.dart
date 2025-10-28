@@ -88,7 +88,7 @@ class AuthService {
     return User(
       id: payloadMap['id'] ?? '',
       username: payloadMap['sub'] ?? '',
-      role: payloadMap['role'] ?? 'PENDING_USER',
+      role: payloadMap['role'] ?? 'PENDING_USER', isActive: false,
     );
   }
 }

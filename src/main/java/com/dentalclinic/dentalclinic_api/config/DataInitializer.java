@@ -18,7 +18,7 @@ import com.dentalclinic.dentalclinic_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-// Khởi tạo dữ liệu mặc định khi start app
+// Initialize default data when application starts
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
@@ -32,15 +32,16 @@ public class DataInitializer {
     @Bean
     public CommandLineRunner initializeData() {
         return args -> {
-            log.info("Khởi tạo dữ liệu mặc định...");
+            log.info("Initializing default data...");
 
-            // Tạo các role
+            // Create roles
             Role adminRole = createRoleIfNotExists("ROLE_ADMIN", "Quản trị viên hệ thống");
             Role doctorRole = createRoleIfNotExists("ROLE_DOCTOR", "Bác sĩ nha khoa");
             Role receptionistRole = createRoleIfNotExists("ROLE_RECEPTIONIST", "Lễ tân");
             createRoleIfNotExists("ROLE_VIEWER", "Người dùng chỉ xem");
+            createRoleIfNotExists("ROLE_PENDING_USER", "Người dùng chờ duyệt");
 
-            // Tạo tài khoản admin
+            // Create admin account
             if (!userRepository.existsByUsername("admin")) {
                 User admin = new User();
                 admin.setUsername("admin");
@@ -54,10 +55,10 @@ public class DataInitializer {
                 admin.setRoles(roles);
                 
                 userRepository.save(admin);
-                log.info("Tạo admin: username=admin, password=admin123");
+                log.info("Created admin user: username=admin, password=admin123");
             }
 
-            // Tạo tài khoản bác sĩ demo
+            // Create demo doctor account
             if (!userRepository.existsByUsername("doctor1")) {
                 User doctor = new User();
                 doctor.setUsername("doctor1");
@@ -71,10 +72,10 @@ public class DataInitializer {
                 doctor.setRoles(roles);
                 
                 userRepository.save(doctor);
-                log.info("Tạo doctor: username=doctor1, password=doctor123");
+                log.info("Created doctor user: username=doctor1, password=doctor123");
             }
 
-            // Tạo tài khoản lễ tân demo
+            // Create demo receptionist account
             if (!userRepository.existsByUsername("receptionist1")) {
                 User receptionist = new User();
                 receptionist.setUsername("receptionist1");
@@ -88,13 +89,13 @@ public class DataInitializer {
                 receptionist.setRoles(roles);
                 
                 userRepository.save(receptionist);
-                log.info("Tạo receptionist: username=receptionist1, password=receptionist123");
+                log.info("Created receptionist user: username=receptionist1, password=receptionist123");
             }
 
-            // Tạo menu mặc định
+            // Create default menus
             createDefaultMenus(adminRole, doctorRole, receptionistRole);
 
-            log.info("Khởi tạo dữ liệu hoàn tất");
+            log.info("Data initialization completed successfully");
         };
     }
 
@@ -105,20 +106,20 @@ public class DataInitializer {
             role.setDescription(description);
             role.setActive(true);
             Role savedRole = roleRepository.save(role);
-            log.info("Tạo role: {}", name);
+            log.info("Created role: {}", name);
             return savedRole;
         });
     }
 
     private void createDefaultMenus(Role adminRole, Role doctorRole, Role receptionistRole) {
         if (menuRepository.count() > 0) {
-            log.info("Menu đã tồn tại, bỏ qua khởi tạo");
+            log.info("Menus already exist, skipping menu initialization");
             return;
         }
 
-        log.info("Tạo menu mặc định...");
+        log.info("Creating default menus...");
 
-        // Dashboard - Tất cả roles
+        // Dashboard - All roles
         Menu dashboard = createMenu("dashboard", "Tổng quan", "/dashboard", "dashboard", 1, null,
                 Set.of(adminRole, doctorRole, receptionistRole));
 
@@ -162,7 +163,7 @@ public class DataInitializer {
         Menu settings = createMenu("settings", "Cài đặt", "/settings", "settings", 9, null,
                 Set.of(adminRole));
 
-        log.info("Đã tạo {} menu mặc định", menuRepository.count());
+        log.info("Created {} default menus successfully", menuRepository.count());
     }
 
     private Menu createMenu(String name, String title, String path, String icon, int order, 

@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Kiểm tra widget còn tồn tại trước khi thao tác với context
       if (!mounted) return;
 
-      if (success) {
+      if (success != null) {
         // Đăng nhập thành công, chuyển đến trang chủ
         Navigator.of(context).pushReplacementNamed('/home');
       } else {

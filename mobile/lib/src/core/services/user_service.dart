@@ -5,76 +5,84 @@ import 'package:doanmobile/src/core/services/storage_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-// Service để xử lý các nghiệp vụ liên quan đến quản lý người dùng
+// Xử lý các nghiệp vụ về quản lý người dùng.
 class UserService {
   static const String _baseUrl = 'http://10.0.2.2:8080';
   final StorageService _storageService = StorageService();
 
-  // Lấy danh sách tất cả người dùng (yêu cầu quyền Admin)
-  Future<List<User>> getUsers() async {
+  // Tạo headers chuẩn cho các request (bao gồm token và header chống cache).
+  Future<Map<String, String>> _getHeaders() async {
     final token = await _storageService.getToken();
+    return {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer ${token ?? ''}',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    };
+  }
+
+  // Lấy danh sách tất cả người dùng.
+  Future<List<User>> getUsers() async {
     final url = Uri.parse('$_baseUrl/api/users');
-
     try {
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer $token',
-      });
-
+      final response = await http.get(url, headers: await _getHeaders());
       if (response.statusCode == 200) {
         final List<dynamic> jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
         return jsonResponse.map((user) => User.fromJson(user)).toList();
-      } else {
-        debugPrint('Lấy danh sách user thất bại: ${response.body}');
-        return [];
       }
+      debugPrint('Lỗi lấy danh sách user: ${response.statusCode}');
     } catch (e) {
-      debugPrint('Lỗi khi lấy danh sách user: $e');
-      return [];
+      debugPrint('Exception khi lấy danh sách user: $e');
     }
+    return [];
   }
 
-  // Cập nhật quyền cho người dùng (yêu cầu quyền Admin)
-  Future<bool> updateUserRole(String userId, String newRole) async {
-    final token = await _storageService.getToken();
-    final url = Uri.parse('$_baseUrl/api/users/$userId/role');
-
+  // Tạo người dùng mới.
+  Future<bool> createUser(Map<String, dynamic> userData) async {
+    final url = Uri.parse('$_baseUrl/api/users');
     try {
-      final response = await http.put(
+      final response = await http.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({'role': newRole}),
+        headers: await _getHeaders(),
+        body: jsonEncode(userData),
       );
-      return response.statusCode == 200;
+      return response.statusCode == 201; // Created
     } catch (e) {
-      debugPrint('Lỗi khi cập nhật role: $e');
+      debugPrint('Exception khi tạo user: $e');
       return false;
     }
   }
 
-  // Cấp lại mật khẩu cho người dùng (yêu cầu quyền Admin)
-  Future<String?> resetPassword(String userId) async {
-    final token = await _storageService.getToken();
-    final url = Uri.parse('$_baseUrl/api/users/$userId/reset-password');
-
+  // Cập nhật thông tin người dùng.
+  Future<bool> updateUser(String userId, Map<String, dynamic> userData) async {
+    final url = Uri.parse('$_baseUrl/api/users/$userId');
     try {
-      final response = await http.post(url, headers: {
-        'Authorization': 'Bearer $token',
-      });
-
-      if (response.statusCode == 200) {
-        // Giả sử API trả về mật khẩu mới trong body
-        final responseBody = jsonDecode(response.body);
-        return responseBody['newPassword'];
-      } else {
-         debugPrint('Lỗi cấp lại mật khẩu: ${response.body}');
-        return null;
-      }
+      final response = await http.put(
+        url,
+        headers: await _getHeaders(),
+        body: jsonEncode(userData),
+      );
+      return response.statusCode == 200;
     } catch (e) {
-      debugPrint('Lỗi khi cấp lại mật khẩu: $e');
-      return null;
+      debugPrint('Exception khi cập nhật user: $e');
+      return false;
+    }
+  }
+
+  // Cập nhật trạng thái active cho người dùng.
+  Future<bool> setUserStatus(String userId, bool isActive) async {
+    final url = Uri.parse('$_baseUrl/api/users/$userId/status');
+    try {
+      final response = await http.put(
+        url,
+        headers: await _getHeaders(),
+        body: jsonEncode({'active': isActive}),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Exception khi đổi trạng thái user: $e');
+      return false;
     }
   }
 }

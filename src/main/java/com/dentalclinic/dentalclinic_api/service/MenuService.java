@@ -38,7 +38,7 @@ public class MenuService {
     // Lấy menu theo username
     @Transactional(readOnly = true)
     public List<MenuResponse> getMenuByUsername(String username) {
-        log.info("Lấy menu cho user: {}", username);
+        log.info("Get menu for user: {}", username);
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user: " + username));
@@ -68,7 +68,7 @@ public class MenuService {
     // Lấy tất cả menu (Admin)
     @Transactional(readOnly = true)
     public List<MenuResponse> getAllMenus() {
-        log.info("Lấy tất cả menu");
+        log.info("Get all menus");
         List<Menu> menus = menuRepository.findByParentIsNullAndActiveTrueOrderByOrderIndex();
         return menus.stream()
                 .map(this::convertToResponse)
@@ -86,7 +86,7 @@ public class MenuService {
     // Tạo menu mới
     @Transactional
     public MenuResponse createMenu(MenuRequest request) {
-        log.info("Tạo menu mới: {}", request.getName());
+        log.info("Create new menu: {}", request.getName());
 
         if (menuRepository.existsByName(request.getName())) {
             throw new RuntimeException("Menu với tên '" + request.getName() + "' đã tồn tại");
@@ -119,7 +119,7 @@ public class MenuService {
         }
 
         Menu savedMenu = menuRepository.save(menu);
-        log.info("Đã tạo menu: {}", savedMenu.getName());
+        log.info("Menu created: {}", savedMenu.getName());
 
         return convertToResponse(savedMenu);
     }
@@ -127,7 +127,7 @@ public class MenuService {
     // Cập nhật menu
     @Transactional
     public MenuResponse updateMenu(Long id, MenuRequest request) {
-        log.info("Cập nhật menu ID: {}", id);
+        log.info("Update menu ID: {}", id);
 
         Menu menu = menuRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy menu với ID: " + id));
@@ -163,7 +163,7 @@ public class MenuService {
         }
 
         Menu updatedMenu = menuRepository.save(menu);
-        log.info("Đã cập nhật menu: {}", updatedMenu.getName());
+        log.info("Menu updated: {}", updatedMenu.getName());
 
         return convertToResponse(updatedMenu);
     }
@@ -171,7 +171,7 @@ public class MenuService {
     // Xóa menu
     @Transactional
     public void deleteMenu(Long id) {
-        log.info("Xóa menu ID: {}", id);
+        log.info("Delete menu ID: {}", id);
 
         Menu menu = menuRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy menu với ID: " + id));
@@ -180,7 +180,7 @@ public class MenuService {
         menu.setActive(false);
         menuRepository.save(menu);
 
-        log.info("Đã xóa menu: {}", menu.getName());
+        log.info("Menu deleted: {}", menu.getName());
     }
 
     // ========== NEW METHODS FOR MOBILE ==========
@@ -190,7 +190,7 @@ public class MenuService {
      */
     @Transactional(readOnly = true)
     public List<MenuResponse> getMenuFlatByUsername(String username) {
-        log.info("Lấy flat menu cho user: {}", username);
+        log.info("Get flat menu for user: {}", username);
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user: " + username));
@@ -210,7 +210,7 @@ public class MenuService {
      */
     @Transactional(readOnly = true)
     public List<MenuResponse> getBreadcrumbPath(Long menuId, String username) {
-        log.info("Lấy breadcrumb cho menu ID: {} của user: {}", menuId, username);
+        log.info("Get breadcrumb for menu ID: {} of user: {}", menuId, username);
 
         // Verify user có quyền access menu này
         User user = userRepository.findByUsername(username)

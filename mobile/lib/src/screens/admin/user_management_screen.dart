@@ -1,9 +1,10 @@
 
 import 'package:doanmobile/src/core/models/user_model.dart';
 import 'package:doanmobile/src/core/services/user_service.dart';
+import 'package:doanmobile/src/screens/admin/add_edit_user_screen.dart';
 import 'package:flutter/material.dart';
 
-// Màn hình quản lý người dùng
+// Màn hình quản lý người dùng (dành cho Admin).
 class UserManagementScreen extends StatefulWidget {
   const UserManagementScreen({super.key});
 
@@ -18,14 +19,45 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   @override
   void initState() {
     super.initState();
-    _usersFuture = _userService.getUsers();
+    _refreshUsers();
   }
 
-  // Hàm để tải lại danh sách người dùng
+  // Tải lại danh sách người dùng từ server.
   void _refreshUsers() {
     setState(() {
       _usersFuture = _userService.getUsers();
     });
+  }
+
+  // Điều hướng đến màn hình thêm/sửa và làm mới lại danh sách nếu có thay đổi.
+  void _navigateAndRefresh(User? user) async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (context) => AddEditUserScreen(user: user),
+      ),
+    );
+
+    // Nếu màn hình add/edit trả về true (có nghĩa là đã lưu thành công)
+    if (result == true) {
+      _refreshUsers();
+    }
+  }
+
+  // Thay đổi trạng thái active/inactive của người dùng.
+  void _toggleUserStatus(User user) async {
+    final newStatus = !user.isActive;
+    final success = await _userService.setUserStatus(user.id, newStatus);
+
+    if (mounted) {
+      _showSnackBar(
+        context,
+        success ? 'Cập nhật trạng thái thành công!' : 'Cập nhật trạng thái thất bại.',
+        success ? Colors.green : Colors.red,
+      );
+      if (success) {
+        _refreshUsers();
+      }
+    }
   }
 
   @override
@@ -34,123 +66,66 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       body: FutureBuilder<List<User>>(
         future: _usersFuture,
         builder: (context, snapshot) {
-          // Trong khi đang tải dữ liệu
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          // Nếu có lỗi
           if (snapshot.hasError) {
             return Center(child: Text('Lỗi tải dữ liệu: ${snapshot.error}'));
           }
-          // Nếu không có dữ liệu
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('Không có người dùng nào.'));
           }
 
           final users = snapshot.data!;
-
-          // Hiển thị danh sách người dùng
-          return ListView.builder(
-            itemCount: users.length,
-            itemBuilder: (context, index) {
-              final user = users[index];
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: ListTile(
-                  title: Text(user.fullName ?? user.username),
-                  subtitle: Text('Role: ${user.role}\nEmail: ${user.email ?? 'N/A'}'),
-                  isThreeLine: true,
-                  trailing: PopupMenuButton<String>(
-                    onSelected: (value) {
-                      if (value == 'reset_password') {
-                        _handleResetPassword(context, user.id);
-                      } else if (value == 'change_role') {
-                        _handleChangeRole(context, user);
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'change_role',
-                        child: Text('Thay đổi quyền'),
-                      ),
-                      const PopupMenuItem(
-                        value: 'reset_password',
-                        child: Text('Cấp lại mật khẩu'),
-                      ),
-                    ],
+          return RefreshIndicator(
+            onRefresh: () async => _refreshUsers(),
+            child: ListView.builder(
+              itemCount: users.length,
+              itemBuilder: (context, index) {
+                final user = users[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: user.isActive ? Colors.green : Colors.grey,
+                      child: const Icon(Icons.person, color: Colors.white),
+                    ),
+                    title: Text(user.fullName ?? user.username),
+                    subtitle: Text('Role: ${user.role}'),
+                    trailing: PopupMenuButton<String>(
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          _navigateAndRefresh(user);
+                        } else if (value == 'toggle_status') {
+                          _toggleUserStatus(user);
+                        }
+                      },
+                      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                        const PopupMenuItem<String>(
+                          value: 'edit',
+                          child: Text('Sửa & Phân quyền'),
+                        ),
+                        PopupMenuItem<String>(
+                          value: 'toggle_status',
+                          child: Text(user.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _navigateAndRefresh(null), // null để vào chế độ thêm mới
+        child: const Icon(Icons.add),
+        tooltip: 'Thêm người dùng mới',
       ),
     );
   }
 
-  // Xử lý logic thay đổi quyền
-  void _handleChangeRole(BuildContext context, User user) {
-    // TODO: Lấy danh sách roles từ API thay vì hardcode
-    const availableRoles = ['ADMIN', 'DOCTOR', 'RECEPTIONIST', 'PENDING_USER'];
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        String selectedRole = user.role;
-        return AlertDialog(
-          title: const Text('Chọn quyền mới'),
-          content: DropdownButton<String>(
-            value: selectedRole,
-            isExpanded: true,
-            items: availableRoles.map((String role) {
-              return DropdownMenuItem<String>(value: role, child: Text(role));
-            }).toList(),
-            onChanged: (newValue) {
-              if (newValue != null) {
-                selectedRole = newValue;
-              }
-            },
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Hủy')),
-            ElevatedButton(
-              onPressed: () async {
-                final success = await _userService.updateUserRole(user.id, selectedRole);
-                Navigator.of(ctx).pop();
-                if (success) {
-                  _showSnackBar(context, 'Cập nhật quyền thành công!', Colors.green);
-                  _refreshUsers(); // Tải lại danh sách
-                } else {
-                  _showSnackBar(context, 'Cập nhật quyền thất bại.', Colors.red);
-                }
-              },
-              child: const Text('Xác nhận'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Xử lý logic cấp lại mật khẩu
-  void _handleResetPassword(BuildContext context, String userId) async {
-    final newPassword = await _userService.resetPassword(userId);
-    if (newPassword != null) {
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Mật khẩu mới'),
-          content: Text('Mật khẩu mới của người dùng là: $newPassword'),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('OK')),
-          ],
-        ),
-      );
-    } else {
-      _showSnackBar(context, 'Cấp lại mật khẩu thất bại.', Colors.red);
-    }
-  }
-
-  // Hàm helper để hiển thị SnackBar
   void _showSnackBar(BuildContext context, String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: color),

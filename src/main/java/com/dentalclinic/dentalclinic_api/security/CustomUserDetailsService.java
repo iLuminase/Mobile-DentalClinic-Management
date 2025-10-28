@@ -3,6 +3,7 @@ package com.dentalclinic.dentalclinic_api.security;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,7 +29,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy user: " + username));
 
         if (!user.getActive()) {
-            throw new UsernameNotFoundException("User không hoạt động: " + username);
+            throw new DisabledException("Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.");
         }
 
         return new org.springframework.security.core.userdetails.User(
