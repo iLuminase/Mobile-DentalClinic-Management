@@ -30,7 +30,8 @@ class AuthProvider with ChangeNotifier {
           await _authService.logout();
           _user = null;
         } else {
-          _user = user;
+          final fullUser = await _authService.getCurrentUserFromAPI();
+          _user = fullUser ?? user;
           await _loadInitialData();
         }
       }
@@ -57,7 +58,8 @@ class AuthProvider with ChangeNotifier {
         return 'Tài khoản của bạn đã được tạo và đang chờ quản trị viên phê duyệt.';
       }
 
-      _user = user;
+      final fullUser = await _authService.getCurrentUserFromAPI();
+      _user = fullUser ?? user;
       await _loadInitialData();
       return null;
     } catch (e) {

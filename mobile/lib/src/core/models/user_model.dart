@@ -34,13 +34,21 @@ class User {
       }
     }
 
+    bool parseActive(dynamic value) {
+      if (value == null) return false;
+      if (value is bool) return value;
+      if (value is int) return value == 1;
+      if (value is String) return value == '1' || value.toLowerCase() == 'true';
+      return false;
+    }
+
     return User(
       id: json['id']?.toString() ?? json['sub']?.toString() ?? '',
       username: json['username'] ?? json['sub'] ?? '',
       email: json['email'] as String?,
       fullName: json['fullName'] as String?,
       role: mainRole,
-      isActive: json['active'] as bool? ?? false,
+      isActive: parseActive(json['active']),
     );
   }
 

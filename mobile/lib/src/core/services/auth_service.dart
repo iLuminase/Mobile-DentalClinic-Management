@@ -84,6 +84,28 @@ class AuthService {
     return null;
   }
 
+  Future<User?> getCurrentUserFromAPI() async {
+    final url = Uri.parse('$_baseUrl/api/users/me');
+    try {
+      final token = await _storageService.getToken();
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer ${token ?? ''}',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(utf8.decode(response.bodyBytes));
+        return User.fromJson(json);
+      }
+    } catch (e) {
+      debugPrint('Lỗi lấy thông tin user từ API: $e');
+    }
+    return null;
+  }
+
   // Giải mã JWT để lấy thông tin user.
   User? _parseJwt(String token) {
     try {
