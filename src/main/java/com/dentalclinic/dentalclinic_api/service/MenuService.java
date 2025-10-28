@@ -2,7 +2,9 @@ package com.dentalclinic.dentalclinic_api.service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -180,6 +182,229 @@ public class MenuService {
 
         log.info("Đã xóa menu: {}", menu.getName());
     }
+
+    // ========== NEW METHODS FOR MOBILE ==========
+
+    /**
+     * Lấy menu flat list (không có hierarchy) - hữu ích cho search và breadcrumb
+     */
+    @Transactional(readOnly = true)
+    public List<MenuResponse> getMenuFlatByUsername(String username) {
+        log.info("Lấy flat menu cho user: {}", username);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user: " + username));
+
+        Set<Role> userRoles = user.getRoles();
+        List<Menu> allMenus = menuRepository.findAllByRolesIn(userRoles);
+
+        // Convert sang DTO flat (không có children)
+        return allMenus.stream()
+                .sorted(Comparator.comparing(Menu::getOrderIndex))
+                .map(this::convertToResponseEnhanced)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Lấy breadcrumb path từ root đến menu cụ thể
+     */
+    @Transactional(readOnly = true)
+    public List<MenuResponse> getBreadcrumbPath(Long menuId, String username) {
+        log.info("Lấy breadcrumb cho menu ID: {} của user: {}", menuId, username);
+
+        // Verify user có quyền access menu này
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user: " + username));
+
+        Menu menu = menuRepository.findById(menuId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy menu với ID: " + menuId));
+
+        // Check permission
+        Set<Role> userRoles = user.getRoles();
+        boolean hasPermission = menu.getRoles().stream()
+                .anyMatch(userRoles::contains);
+
+        if (!hasPermission) {
+            throw new RuntimeException("User không có quyền truy cập menu này");
+        }
+
+        // Build breadcrumb từ current menu lên root
+        LinkedList<MenuResponse> breadcrumb = new LinkedList<>();
+        Menu current = menu;
+
+        while (current != null) {
+            breadcrumb.addFirst(convertToResponseEnhanced(current));
+            current = current.getParent();
+        }
+
+        return breadcrumb;
+    }
+
+    /**
+     * Lấy thống kê menu của user
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> getMenuStatistics(String username) {
+        log.info("Lấy thống kê menu cho user: {}", username);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user: " + username));
+
+        Set<Role> userRoles = user.getRoles();
+        List<Menu> allMenus = menuRepository.findAllByRolesIn(userRoles);
+
+        // Count parent menus
+        long parentCount = allMenus.stream()
+                .filter(m -> m.getParent() == null)
+                .count();
+
+        // Count child menus
+        long childCount = allMenus.stream()
+                .filter(m -> m.getParent() != null)
+                .count();
+
+        // Count by depth level
+        Map<Integer, Long> byDepth = allMenus.stream()
+                .collect(Collectors.groupingBy(
+                        m -> getMenuDepth(m),
+                        Collectors.counting()
+                ));
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalMenus", allMenus.size());
+        stats.put("parentMenus", parentCount);
+        stats.put("childMenus", childCount);
+        stats.put("byDepth", byDepth);
+        stats.put("roles", userRoles.stream().map(Role::getName).collect(Collectors.toList()));
+
+        return stats;
+    }
+
+    /**
+     * Lấy toàn bộ menu hierarchy (Admin)
+     */
+    @Transactional(readOnly = true)
+    public List<MenuResponse> getFullMenuHierarchy() {
+        log.info("Lấy toàn bộ menu hierarchy");
+
+        List<Menu> allMenus = menuRepository.findAll();
+
+        // Group by parentId
+        Map<Long, List<Menu>> menusByParentId = allMenus.stream()
+                .filter(m -> m.getParent() != null)
+                .collect(Collectors.groupingBy(m -> m.getParent().getId()));
+
+        // Get root menus
+        List<Menu> rootMenus = allMenus.stream()
+                .filter(m -> m.getParent() == null)
+                .sorted(Comparator.comparing(Menu::getOrderIndex))
+                .collect(Collectors.toList());
+
+        // Build hierarchy with enhanced info
+        return rootMenus.stream()
+                .map(menu -> convertToResponseWithChildrenEnhanced(menu, menusByParentId, 0))
+                .collect(Collectors.toList());
+    }
+
+    // ========== HELPER METHODS ==========
+
+    /**
+     * Calculate menu depth
+     */
+    private int getMenuDepth(Menu menu) {
+        int depth = 0;
+        Menu current = menu;
+        while (current.getParent() != null) {
+            depth++;
+            current = current.getParent();
+        }
+        return depth;
+    }
+
+    /**
+     * Convert to enhanced response with mobile-friendly fields
+     */
+    private MenuResponse convertToResponseEnhanced(Menu menu) {
+        int depth = getMenuDepth(menu);
+        boolean hasChildren = menu.getChildren() != null && !menu.getChildren().isEmpty();
+
+        List<String> roleNames = menu.getRoles() != null
+                ? menu.getRoles().stream().map(Role::getName).collect(Collectors.toList())
+                : new ArrayList<>();
+
+        return MenuResponse.builder()
+                .id(menu.getId())
+                .name(menu.getName())
+                .title(menu.getTitle())
+                .path(menu.getPath())
+                .icon(menu.getIcon())
+                .iconType("material") // Default icon type
+                .orderIndex(menu.getOrderIndex())
+                .parentId(menu.getParent() != null ? menu.getParent().getId() : null)
+                .active(menu.getActive())
+                .depth(depth)
+                .hasChildren(hasChildren)
+                .roles(roleNames)
+                .canView(true) // Default permissions - có thể customize sau
+                .canEdit(roleNames.contains("ROLE_ADMIN"))
+                .canDelete(roleNames.contains("ROLE_ADMIN"))
+                .target("_self") // Default target
+                .external(false) // Default not external
+                .componentName(convertToComponentName(menu.getName())) // Generate component name
+                .tooltip(menu.getTitle()) // Use title as default tooltip
+                .children(new ArrayList<>())
+                .build();
+    }
+
+    /**
+     * Convert to enhanced response with children
+     */
+    private MenuResponse convertToResponseWithChildrenEnhanced(
+            Menu menu,
+            Map<Long, List<Menu>> menusByParentId,
+            int depth) {
+
+        MenuResponse response = convertToResponseEnhanced(menu);
+        response.setDepth(depth);
+
+        // Get children from map
+        List<Menu> children = menusByParentId.getOrDefault(menu.getId(), new ArrayList<>());
+        if (!children.isEmpty()) {
+            List<MenuResponse> childrenResponses = children.stream()
+                    .sorted(Comparator.comparing(Menu::getOrderIndex))
+                    .map(child -> convertToResponseWithChildrenEnhanced(child, menusByParentId, depth + 1))
+                    .collect(Collectors.toList());
+            response.setChildren(childrenResponses);
+            response.setHasChildren(true);
+        }
+
+        return response;
+    }
+
+    /**
+     * Convert menu name to Flutter component name
+     * Example: "users" -> "UsersScreen", "appointments-list" -> "AppointmentsListScreen"
+     */
+    private String convertToComponentName(String menuName) {
+        if (menuName == null || menuName.isEmpty()) {
+            return "Screen";
+        }
+
+        String[] parts = menuName.split("-");
+        StringBuilder componentName = new StringBuilder();
+
+        for (String part : parts) {
+            if (!part.isEmpty()) {
+                componentName.append(Character.toUpperCase(part.charAt(0)))
+                        .append(part.substring(1).toLowerCase());
+            }
+        }
+
+        componentName.append("Screen");
+        return componentName.toString();
+    }
+
+    // ========== EXISTING CONVERSION METHODS (keep for backward compatibility) ==========
 
     // Convert entity -> DTO
     private MenuResponse convertToResponse(Menu menu) {

@@ -1,6 +1,7 @@
 package com.dentalclinic.dentalclinic_api.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,7 +30,13 @@ public class MenuController {
 
     private final MenuService menuService;
 
-    // Lấy menu của user hiện tại
+    // ========== USER ENDPOINTS (Authentication required) ==========
+    
+    /**
+     * GET /api/menus/me
+     * Lấy menu hierarchy của user hiện tại (theo roles)
+     * Response: Danh sách menu dạng tree với đầy đủ thông tin cho mobile
+     */
     @GetMapping("/me")
     public ResponseEntity<List<MenuResponse>> getMyMenus(Authentication authentication) {
         String username = authentication.getName();
@@ -37,7 +44,49 @@ public class MenuController {
         return ResponseEntity.ok(menus);
     }
 
-    // Lấy tất cả menu (Admin only)
+    /**
+     * GET /api/menus/flat
+     * Lấy tất cả menu của user dạng flat list (không có hierarchy)
+     * Hữu ích cho mobile khi cần tìm kiếm menu hoặc hiển thị breadcrumb
+     */
+    @GetMapping("/flat")
+    public ResponseEntity<List<MenuResponse>> getMyMenusFlat(Authentication authentication) {
+        String username = authentication.getName();
+        List<MenuResponse> menus = menuService.getMenuFlatByUsername(username);
+        return ResponseEntity.ok(menus);
+    }
+
+    /**
+     * GET /api/menus/breadcrumb/{id}
+     * Lấy breadcrumb path từ root đến menu cụ thể
+     * Response: [Home > Users > User List]
+     */
+    @GetMapping("/breadcrumb/{id}")
+    public ResponseEntity<List<MenuResponse>> getBreadcrumb(
+            @PathVariable Long id,
+            Authentication authentication) {
+        String username = authentication.getName();
+        List<MenuResponse> breadcrumb = menuService.getBreadcrumbPath(id, username);
+        return ResponseEntity.ok(breadcrumb);
+    }
+
+    /**
+     * GET /api/menus/stats
+     * Lấy thống kê menu của user (số lượng menu, menu mới, notifications)
+     */
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Object>> getMenuStats(Authentication authentication) {
+        String username = authentication.getName();
+        Map<String, Object> stats = menuService.getMenuStatistics(username);
+        return ResponseEntity.ok(stats);
+    }
+
+    // ========== ADMIN ENDPOINTS ==========
+    
+    /**
+     * GET /api/menus
+     * Lấy tất cả menu (Admin only)
+     */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<MenuResponse>> getAllMenus() {
@@ -45,7 +94,22 @@ public class MenuController {
         return ResponseEntity.ok(menus);
     }
 
-    // Lấy menu theo ID (Admin only)
+    /**
+     * GET /api/menus/hierarchy
+     * Lấy toàn bộ menu hierarchy (Admin only)
+     * Hiển thị đầy đủ cây menu để quản lý
+     */
+    @GetMapping("/hierarchy")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<MenuResponse>> getMenuHierarchy() {
+        List<MenuResponse> menus = menuService.getFullMenuHierarchy();
+        return ResponseEntity.ok(menus);
+    }
+
+    /**
+     * GET /api/menus/{id}
+     * Lấy chi tiết menu theo ID (Admin only)
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MenuResponse> getMenuById(@PathVariable Long id) {
@@ -53,7 +117,10 @@ public class MenuController {
         return ResponseEntity.ok(menu);
     }
 
-    // Tạo menu mới (Admin only)
+    /**
+     * POST /api/menus
+     * Tạo menu mới (Admin only)
+     */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MenuResponse> createMenu(@Valid @RequestBody MenuRequest request) {
@@ -61,7 +128,10 @@ public class MenuController {
         return ResponseEntity.ok(menu);
     }
 
-    // Cập nhật menu (Admin only)
+    /**
+     * PUT /api/menus/{id}
+     * Cập nhật menu (Admin only)
+     */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MenuResponse> updateMenu(
@@ -71,7 +141,10 @@ public class MenuController {
         return ResponseEntity.ok(menu);
     }
 
-    // Xóa menu (Admin only)
+    /**
+     * DELETE /api/menus/{id}
+     * Xóa menu (Admin only)
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteMenu(@PathVariable Long id) {
