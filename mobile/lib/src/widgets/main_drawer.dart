@@ -15,8 +15,7 @@ class MainDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final user = authProvider.user;
-    // Lấy cây menu động từ provider
-    final menuItems = authProvider.menuItems; 
+    final menuItems = authProvider.menuItems;
 
     return Drawer(
       child: ListView(
@@ -29,13 +28,11 @@ class MainDrawer extends StatelessWidget {
               child: Icon(Icons.person, size: 50),
             ),
           ),
-          // Nếu chưa tải xong menu hoặc menu rỗng, hiển thị loading hoặc thông báo
           if (authProvider.isLoading)
             const Center(child: CircularProgressIndicator())
           else if (menuItems.isEmpty)
             const ListTile(title: Text('Không có menu phụ.'))
           else
-          // Xây dựng danh sách menu từ cây menu
             ...menuItems.map((item) => _buildMenuItem(context, item)).toList(),
         ],
       ),
@@ -44,18 +41,16 @@ class MainDrawer extends StatelessWidget {
 
   // Hàm đệ quy để xây dựng từng mục menu trong Drawer
   Widget _buildMenuItem(BuildContext context, MenuItem item) {
-    // Nếu không có menu con -> ListTile bình thường
     if (item.children.isEmpty) {
       return ListTile(
         leading: Icon(getIconData(item.icon), size: 22),
         title: Text(item.title),
         onTap: () {
-          Navigator.of(context).pop(); // Đóng Drawer
-          onMenuSelected(item.route); // Thông báo cho HomePage
+          Navigator.of(context).pop();
+          onMenuSelected(item.path);
         },
       );
     } else {
-      // Nếu có menu con -> ExpansionTile
       return ExpansionTile(
         leading: Icon(getIconData(item.icon)),
         title: Text(item.title),

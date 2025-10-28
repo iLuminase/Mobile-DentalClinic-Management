@@ -1,5 +1,6 @@
 package com.dentalclinic.dentalclinic_api.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dentalclinic.dentalclinic_api.dto.ChangePasswordRequest;
+import com.dentalclinic.dentalclinic_api.dto.PasswordResponse;
 import com.dentalclinic.dentalclinic_api.dto.UserRequest;
 import com.dentalclinic.dentalclinic_api.dto.UserResponse;
 import com.dentalclinic.dentalclinic_api.entity.Role;
@@ -36,7 +39,7 @@ public class UserService {
      * Get all users.
      */
     public List<UserResponse> getAllUsers() {
-        log.info("Getting all users");
+        log.info("Lay tat ca nguoi dung");
         return userRepository.findAll().stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
@@ -46,9 +49,9 @@ public class UserService {
      * Get user by ID.
      */
     public UserResponse getUserById(Long id) {
-        log.info("Getting user by ID: {}", id);
+        log.info("Lay nguoi dung theo ID: {}", id);
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay nguoi dung voi ID: " + id));
         return convertToResponse(user);
     }
 
@@ -56,9 +59,9 @@ public class UserService {
      * Get user by username.
      */
     public UserResponse getUserByUsername(String username) {
-        log.info("Getting user by username: {}", username);
+        log.info("Lay nguoi dung theo username: {}", username);
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay nguoi dung: " + username));
         return convertToResponse(user);
     }
 
@@ -66,7 +69,7 @@ public class UserService {
      * Get all doctors.
      */
     public List<UserResponse> getAllDoctors() {
-        log.info("Getting all doctors");
+        log.info("Lay tat ca bac si");
         return userRepository.findAllDoctors().stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
@@ -77,14 +80,14 @@ public class UserService {
      */
     @Transactional
     public UserResponse createUser(UserRequest request) {
-        log.info("Creating user: {}", request.getUsername());
+        log.info("Tao nguoi dung moi: {}", request.getUsername());
 
         // Validate unique constraints
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Tên đăng nhập đã tồn tại: " + request.getUsername());
+            throw new RuntimeException("Ten dang nhap da ton tai: " + request.getUsername());
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email đã được sử dụng: " + request.getEmail());
+            throw new RuntimeException("Email da duoc su dung: " + request.getEmail());
         }
 
         User user = new User();
@@ -102,21 +105,21 @@ public class UserService {
             Set<Role> roles = new HashSet<>();
             for (String roleName : request.getRoleNames()) {
                 Role role = roleRepository.findByName(roleName)
-                        .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
+                        .orElseThrow(() -> new RuntimeException("Khong tim thay role: " + roleName));
                 roles.add(role);
             }
             user.setRoles(roles);
         } else {
             // Default role: ROLE_PENDING_USER
             Role defaultRole = roleRepository.findByName(RoleEnum.getDefaultRole().getRoleName())
-                    .orElseThrow(() -> new RuntimeException("Default role not found: " + RoleEnum.getDefaultRole().getRoleName()));
+                    .orElseThrow(() -> new RuntimeException("Khong tim thay role mac dinh: " + RoleEnum.getDefaultRole().getRoleName()));
             Set<Role> roles = new HashSet<>();
             roles.add(defaultRole);
             user.setRoles(roles);
         }
 
         User savedUser = userRepository.save(user);
-        log.info("User created successfully: {}", savedUser.getUsername());
+        log.info("Tao nguoi dung thanh cong: {}", savedUser.getUsername());
 
         return convertToResponse(savedUser);
     }
@@ -126,19 +129,19 @@ public class UserService {
      */
     @Transactional
     public UserResponse updateUser(Long id, UserRequest request) {
-        log.info("Updating user ID: {}", id);
+        log.info("Cap nhat nguoi dung ID: {}", id);
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay nguoi dung voi ID: " + id));
 
         // Check unique constraints if changed
         if (!user.getUsername().equals(request.getUsername()) &&
                 userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Tên đăng nhập đã tồn tại: " + request.getUsername());
+            throw new RuntimeException("Ten dang nhap da ton tai: " + request.getUsername());
         }
         if (!user.getEmail().equals(request.getEmail()) &&
                 userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email đã được sử dụng: " + request.getEmail());
+            throw new RuntimeException("Email da duoc su dung: " + request.getEmail());
         }
 
         user.setUsername(request.getUsername());
@@ -157,14 +160,14 @@ public class UserService {
             Set<Role> roles = new HashSet<>();
             for (String roleName : request.getRoleNames()) {
                 Role role = roleRepository.findByName(roleName)
-                        .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
+                        .orElseThrow(() -> new RuntimeException("Khong tim thay role: " + roleName));
                 roles.add(role);
             }
             user.setRoles(roles);
         }
 
         User updatedUser = userRepository.save(user);
-        log.info("User updated successfully: {}", updatedUser.getUsername());
+        log.info("Cap nhat nguoi dung thanh cong: {}", updatedUser.getUsername());
 
         return convertToResponse(updatedUser);
     }
@@ -174,14 +177,14 @@ public class UserService {
      */
     @Transactional
     public void deleteUser(Long id) {
-        log.info("Deleting user ID: {}", id);
+        log.info("Xoa nguoi dung ID: {}", id);
 
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User not found with ID: " + id);
+            throw new RuntimeException("Khong tim thay nguoi dung voi ID: " + id);
         }
 
         userRepository.deleteById(id);
-        log.info("User deleted successfully");
+        log.info("Xoa nguoi dung thanh cong");
     }
 
     /**
@@ -189,21 +192,21 @@ public class UserService {
      */
     @Transactional
     public UserResponse assignRoles(Long userId, Set<String> roleNames) {
-        log.info("Assigning roles to user ID: {}", userId);
+        log.info("Gan role cho nguoi dung ID: {}", userId);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay nguoi dung voi ID: " + userId));
 
         Set<Role> roles = new HashSet<>();
         for (String roleName : roleNames) {
             Role role = roleRepository.findByName(roleName)
-                    .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
+                    .orElseThrow(() -> new RuntimeException("Khong tim thay role: " + roleName));
             roles.add(role);
         }
 
         user.setRoles(roles);
         User updatedUser = userRepository.save(user);
-        log.info("Roles assigned successfully");
+        log.info("Gan role thanh cong");
 
         return convertToResponse(updatedUser);
     }
@@ -212,6 +215,11 @@ public class UserService {
      * Convert User entity to UserResponse DTO.
      */
     private UserResponse convertToResponse(User user) {
+        // Tạo bản sao của roles để tránh ConcurrentModificationException
+        List<String> roleNames = new ArrayList<>(user.getRoles()).stream()
+                .map(Role::getName)
+                .collect(Collectors.toList());
+
         return UserResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -220,13 +228,7 @@ public class UserService {
                 .phoneNumber(user.getPhoneNumber())
                 .dateOfBirth(user.getDateOfBirth())
                 .address(user.getAddress())
-                .roles(user.getRoles().stream()
-                        .map(role -> UserResponse.RoleInfo.builder()
-                                .id(role.getId())
-                                .name(role.getName())
-                                .description(role.getDescription())
-                                .build())
-                        .collect(Collectors.toSet()))
+                .roles(roleNames)
                 .active(user.getActive())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
@@ -235,12 +237,74 @@ public class UserService {
     }
 
     public UserResponse updateUserStatus(Long id, Boolean isActive) {
-        // TODO Auto-generated method stub
-        log.info("Updating status for user ID: {}", id);
+        log.info("Cap nhat trang thai cho nguoi dung ID: {}", id);
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay nguoi dung voi ID: " + id));
         user.setActive(isActive);
         User updatedUser = userRepository.save(user);
         return convertToResponse(updatedUser);
     }
+
+    /**
+     * Đổi mật khẩu (user tự đổi)
+     * Yêu cầu: phải nhập đúng mật khẩu hiện tại
+     */
+    @Transactional
+    public PasswordResponse changePassword(String username, ChangePasswordRequest request) {
+        log.info("User {} dang thay doi mat khau", username);
+
+        // Validate new password và confirm password match
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            return new PasswordResponse(false, "Mat khau moi va xac nhan mat khau khong khop");
+        }
+
+        // Tìm user
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Khong tim thay user: " + username));
+
+        // Verify mật khẩu hiện tại
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            return new PasswordResponse(false, "Mat khau hien tai khong dung");
+        }
+
+        // Kiểm tra mật khẩu mới không trùng với mật khẩu cũ
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            return new PasswordResponse(false, "Mat khau moi khong duoc trung voi mat khau hien tai");
+        }
+
+        // Update password
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        log.info("Mat khau cua user {} da duoc thay doi thanh cong", username);
+        return new PasswordResponse(true, "Doi mat khau thanh cong", username);
+    }
+
+    /**
+     * Reset mật khẩu về mặc định (Admin only)
+     * Mật khẩu mặc định: "password123"
+     */
+    @Transactional
+    public PasswordResponse resetPasswordToDefault(Long userId) {
+        log.info("Admin dang reset mat khau cho user ID: {}", userId);
+
+        String defaultPassword = "password123";
+
+        // Tìm user
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Khong tim thay user voi ID: " + userId));
+
+        // Reset password
+        user.setPassword(passwordEncoder.encode(defaultPassword));
+        userRepository.save(user);
+
+        log.info("Mat khau cua user {} (ID: {}) da duoc reset ve mac dinh", user.getUsername(), userId);
+        return new PasswordResponse(
+            true, 
+            "Reset mat khau thanh cong. Mat khau moi: " + defaultPassword, 
+            user.getUsername(),
+            defaultPassword
+        );
+    }
 }
+

@@ -1,0 +1,24 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot-DentalclinicApiApplication<dentalclinic-api>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.dentalclinic.dentalclinic_api.DentalclinicApiApplication",
+      "projectName": "dentalclinic-api",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-DentalClinicApplication<dentalclinic-api>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.dentalclinic.dentalclinic_api.DentalClinicApplication",
+      "projectName": "dentalclinic-api",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
+}

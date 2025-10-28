@@ -1,8 +1,7 @@
 package com.dentalclinic.dentalclinic_api.enums;
 
-/**
- * Enum for system roles with their IDs and descriptions.
- */
+
+// Enum quản lý các vai trò trong hệ thống
 public enum RoleEnum {
     ADMIN(1L, "ROLE_ADMIN", "Quản trị viên hệ thống"),
     DOCTOR(2L, "ROLE_DOCTOR", "Bác sĩ nha khoa"),
@@ -10,9 +9,9 @@ public enum RoleEnum {
     VIEWER(4L, "ROLE_VIEWER", "Người dùng chỉ xem"),
     PENDING_USER(5L, "ROLE_PENDING_USER", "Người dùng chờ duyệt");
 
-    private final Long id;
-    private final String roleName;
-    private final String description;
+    private final Long id; // ID của vai trò
+    private final String roleName; // Tên vai trò
+    private final String description; // Mô tả vai trò
 
     RoleEnum(Long id, String roleName, String description) {
         this.id = id;
@@ -32,19 +31,12 @@ public enum RoleEnum {
         return description;
     }
 
-    /**
-     * Get default role for new user registration.
-     * @return PENDING_USER role
-     */
+    // Lấy vai trò mặc định cho user mới
     public static RoleEnum getDefaultRole() {
         return PENDING_USER;
     }
 
-    /**
-     * Find RoleEnum by role name.
-     * @param roleName the role name (e.g., "ROLE_ADMIN")
-     * @return RoleEnum or null if not found
-     */
+    // Tìm vai trò theo tên
     public static RoleEnum fromRoleName(String roleName) {
         for (RoleEnum role : values()) {
             if (role.getRoleName().equals(roleName)) {
@@ -54,11 +46,7 @@ public enum RoleEnum {
         return null;
     }
 
-    /**
-     * Find RoleEnum by ID.
-     * @param id the role ID
-     * @return RoleEnum or null if not found
-     */
+    // Tìm vai trò theo ID
     public static RoleEnum fromId(Long id) {
         for (RoleEnum role : values()) {
             if (role.getId().equals(id)) {

@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: dentalclinic-api
+
+  # Database Configuration (MSSQL Server)
+  datasource:
+    # MSSQL Server với SQL Authentication + UTF-8 Support
+    url: jdbc:sqlserver://localhost:1433;databaseName=DentalClinicDB;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true;characterEncoding=UTF-8
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+    username: sa
+    password: admin123
+
+  # JPA/Hibernate Configuration
+  jpa:
+    database-platform: org.hibernate.dialect.SQLServerDialect
+    hibernate:
+      ddl-auto: update # Tự động tạo/update tables (đổi thành 'validate' khi production)
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.SQLServerDialect
+        connection:
+          characterEncoding: UTF-8
+          useUnicode: true
+
+# JWT Configuration
+jwt:
+  secret: MyVerySecureSecretKeyForDentalClinicManagementSystemAtLeast256BitsLong12345
+  expiration: 86400000 # 24 hours in milliseconds
+  refresh-expiration: 604800000 # 7 days in milliseconds
+
+# Server Configuration
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+# Logging Configuration
+logging:
+  level:
+    com.dentalclinic: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+  charset:
+    console: UTF-8
+    file: UTF-8
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%5p) %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"

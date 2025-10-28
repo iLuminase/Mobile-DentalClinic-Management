@@ -1,8 +1,6 @@
 
 import 'package:flutter/material.dart';
 
-// Danh sách các icon có sẵn để lựa chọn.
-// Key là tên icon (sẽ được lưu vào DB), Value là IconData để hiển thị.
 const Map<String, IconData> availableIcons = {
   'dashboard': Icons.dashboard,
   'people': Icons.people,
@@ -22,7 +20,6 @@ const Map<String, IconData> availableIcons = {
   'help_outline': Icons.help_outline,
 };
 
-/// Một dialog hiển thị một grid các icon cho người dùng lựa chọn.
 class IconPickerDialog extends StatelessWidget {
   const IconPickerDialog({super.key});
 
@@ -35,9 +32,9 @@ class IconPickerDialog extends StatelessWidget {
         child: GridView.builder(
           shrinkWrap: true,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 5,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
+            crossAxisCount: 4, // Giảm số cột để có nhiều không gian hơn
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
           ),
           itemCount: availableIcons.length,
           itemBuilder: (context, index) {
@@ -45,21 +42,22 @@ class IconPickerDialog extends StatelessWidget {
             final iconData = availableIcons.values.elementAt(index);
 
             return InkWell(
-              onTap: () {
-                // Khi người dùng chọn, trả về tên của icon đó.
-                Navigator.of(context).pop(iconName);
-              },
+              onTap: () => Navigator.of(context).pop(iconName),
               borderRadius: BorderRadius.circular(8),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(iconData, size: 32, color: Theme.of(context).primaryColor),
-                  const SizedBox(height: 4),
-                  Text(
-                    iconName,
-                    style: const TextStyle(fontSize: 10),
-                    overflow: TextOverflow.ellipsis,
-                  )
+                  Icon(iconData, size: 30, color: Theme.of(context).primaryColor),
+                  const SizedBox(height: 8),
+                  // SỬA LỖI: Dùng FittedBox để text tự co lại nếu cần
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      iconName,
+                      style: const TextStyle(fontSize: 12),
+                      maxLines: 1,
+                    ),
+                  ),
                 ],
               ),
             );

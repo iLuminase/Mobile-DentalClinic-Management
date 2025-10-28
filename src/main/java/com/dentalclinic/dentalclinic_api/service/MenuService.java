@@ -43,7 +43,8 @@ public class MenuService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user: " + username));
 
-        Set<Role> userRoles = user.getRoles();
+        // Tạo bản sao của user roles để tránh ConcurrentModificationException
+        Set<Role> userRoles = new HashSet<>(user.getRoles());
         
         // Lấy TẤT CẢ menu (kể cả submenu) mà user có quyền
         List<Menu> allMenus = menuRepository.findAllByRolesIn(userRoles);
@@ -183,6 +184,29 @@ public class MenuService {
         log.info("Menu deleted: {}", menu.getName());
     }
 
+    // Cập nhật roles cho menu
+    @Transactional
+    public MenuResponse updateMenuRoles(Long id, List<String> roleNames) {
+        log.info("Update roles for menu ID: {}", id);
+
+        Menu menu = menuRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy menu với ID: " + id));
+
+        // Tìm các roles theo tên
+        Set<Role> roles = new HashSet<>();
+        for (String roleName : roleNames) {
+            Role role = roleRepository.findByName(roleName)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy role: " + roleName));
+            roles.add(role);
+        }
+
+        menu.setRoles(roles);
+        Menu updatedMenu = menuRepository.save(menu);
+
+        log.info("Updated roles for menu: {}", menu.getName());
+        return convertToResponse(updatedMenu);
+    }
+
     // ========== NEW METHODS FOR MOBILE ==========
 
     /**
@@ -195,7 +219,8 @@ public class MenuService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user: " + username));
 
-        Set<Role> userRoles = user.getRoles();
+        // Tạo bản sao của user roles để tránh ConcurrentModificationException
+        Set<Role> userRoles = new HashSet<>(user.getRoles());
         List<Menu> allMenus = menuRepository.findAllByRolesIn(userRoles);
 
         // Convert sang DTO flat (không có children)
@@ -219,9 +244,10 @@ public class MenuService {
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy menu với ID: " + menuId));
 
-        // Check permission
-        Set<Role> userRoles = user.getRoles();
-        boolean hasPermission = menu.getRoles().stream()
+        // Check permission - Tạo bản sao để tránh ConcurrentModificationException
+        Set<Role> userRoles = new HashSet<>(user.getRoles());
+        Set<Role> menuRoles = new HashSet<>(menu.getRoles());
+        boolean hasPermission = menuRoles.stream()
                 .anyMatch(userRoles::contains);
 
         if (!hasPermission) {
@@ -250,7 +276,8 @@ public class MenuService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user: " + username));
 
-        Set<Role> userRoles = user.getRoles();
+        // Tạo bản sao của user roles để tránh ConcurrentModificationException
+        Set<Role> userRoles = new HashSet<>(user.getRoles());
         List<Menu> allMenus = menuRepository.findAllByRolesIn(userRoles);
 
         // Count parent menus
@@ -282,12 +309,14 @@ public class MenuService {
 
     /**
      * Lấy toàn bộ menu hierarchy (Admin)
+     * Sử dụng eager loading để tránh LazyInitializationException
      */
     @Transactional(readOnly = true)
     public List<MenuResponse> getFullMenuHierarchy() {
         log.info("Lấy toàn bộ menu hierarchy");
 
-        List<Menu> allMenus = menuRepository.findAll();
+        // Eager load children và roles
+        List<Menu> allMenus = menuRepository.findAllWithChildrenAndRoles();
 
         // Group by parentId
         Map<Long, List<Menu>> menusByParentId = allMenus.stream()
@@ -323,14 +352,42 @@ public class MenuService {
 
     /**
      * Convert to enhanced response with mobile-friendly fields
+     * Xử lý an toàn Hibernate lazy loading
      */
     private MenuResponse convertToResponseEnhanced(Menu menu) {
         int depth = getMenuDepth(menu);
-        boolean hasChildren = menu.getChildren() != null && !menu.getChildren().isEmpty();
+        
+        // Xử lý children - kiểm tra null và khởi tạo collection an toàn
+        boolean hasChildren = false;
+        if (menu.getChildren() != null) {
+            try {
+                // Force initialize bằng cách gọi size()
+                Set<Menu> children = menu.getChildren();
+                children.size(); // Trigger lazy loading
+                hasChildren = !children.isEmpty();
+            } catch (Exception e) {
+                log.warn("Không thể load children cho menu {}: {} - {}", 
+                        menu.getId(), e.getClass().getSimpleName(), e.getMessage(), e);
+                hasChildren = false;
+            }
+        }
 
-        List<String> roleNames = menu.getRoles() != null
-                ? menu.getRoles().stream().map(Role::getName).collect(Collectors.toList())
-                : new ArrayList<>();
+        // Xử lý roles - tạo bản sao an toàn
+        List<String> roleNames = new ArrayList<>();
+        if (menu.getRoles() != null) {
+            try {
+                // Force initialize và stream
+                Set<Role> roles = menu.getRoles();
+                roles.size(); // Trigger lazy loading
+                roleNames = roles.stream()
+                        .map(Role::getName)
+                        .collect(Collectors.toList());
+            } catch (Exception e) {
+                log.warn("Không thể load roles cho menu {}: {} - {}", 
+                        menu.getId(), e.getClass().getSimpleName(), e.getMessage(), e);
+                roleNames = new ArrayList<>();
+            }
+        }
 
         return MenuResponse.builder()
                 .id(menu.getId())
@@ -408,6 +465,22 @@ public class MenuService {
 
     // Convert entity -> DTO
     private MenuResponse convertToResponse(Menu menu) {
+        // Xử lý roles - tạo bản sao an toàn
+        List<String> roleNames = new ArrayList<>();
+        if (menu.getRoles() != null) {
+            try {
+                Set<Role> roles = menu.getRoles();
+                roles.size(); // Trigger lazy loading
+                roleNames = roles.stream()
+                        .map(Role::getName)
+                        .collect(Collectors.toList());
+            } catch (Exception e) {
+                log.warn("Không thể load roles cho menu {}: {} - {}", 
+                        menu.getId(), e.getClass().getSimpleName(), e.getMessage(), e);
+                roleNames = new ArrayList<>();
+            }
+        }
+
         MenuResponse response = MenuResponse.builder()
                 .id(menu.getId())
                 .name(menu.getName())
@@ -417,6 +490,7 @@ public class MenuService {
                 .orderIndex(menu.getOrderIndex())
                 .parentId(menu.getParent() != null ? menu.getParent().getId() : null)
                 .active(menu.getActive())
+                .roles(roleNames) // SET ROLES
                 .children(new ArrayList<>())
                 .build();
 
@@ -443,6 +517,22 @@ public class MenuService {
 
     // Convert entity -> DTO với children từ Map (tránh N+1 query)
     private MenuResponse convertToResponseWithChildren(Menu menu, Map<Long, List<Menu>> menusByParentId) {
+        // Xử lý roles - tạo bản sao an toàn
+        List<String> roleNames = new ArrayList<>();
+        if (menu.getRoles() != null) {
+            try {
+                Set<Role> roles = menu.getRoles();
+                roles.size(); // Trigger lazy loading
+                roleNames = roles.stream()
+                        .map(Role::getName)
+                        .collect(Collectors.toList());
+            } catch (Exception e) {
+                log.warn("Không thể load roles cho menu {}: {} - {}", 
+                        menu.getId(), e.getClass().getSimpleName(), e.getMessage(), e);
+                roleNames = new ArrayList<>();
+            }
+        }
+
         MenuResponse response = MenuResponse.builder()
                 .id(menu.getId())
                 .name(menu.getName())
@@ -452,6 +542,7 @@ public class MenuService {
                 .orderIndex(menu.getOrderIndex())
                 .parentId(menu.getParent() != null ? menu.getParent().getId() : null)
                 .active(menu.getActive())
+                .roles(roleNames) // SET ROLES
                 .children(new ArrayList<>())
                 .build();
 

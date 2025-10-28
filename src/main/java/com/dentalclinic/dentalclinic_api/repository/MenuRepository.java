@@ -32,4 +32,9 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
 
     // Kiểm tra tên menu đã tồn tại
     boolean existsByName(String name);
+
+    // Lấy tất cả menu với eager loading children và roles (cho admin management)
+    @EntityGraph(attributePaths = {"children", "roles"})
+    @Query("SELECT m FROM Menu m")
+    List<Menu> findAllWithChildrenAndRoles();
 }

@@ -7,6 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class DentalClinicApplication {
     public static void main(String[] args) {
+        // Thiết lập UTF-8 cho console
+        System.setProperty("file.encoding", "UTF-8");
+        System.setProperty("console.encoding", "UTF-8");
+        
         SpringApplication.run(DentalClinicApplication.class, args);
     }
 }

@@ -1,5 +1,6 @@
 
 import 'package:doanmobile/src/core/providers/auth_provider.dart';
+import 'package:doanmobile/src/screens/admin/menu_management_screen.dart'; // Import màn hình mới
 import 'package:doanmobile/src/screens/auth/login_screen.dart';
 import 'package:doanmobile/src/screens/home_page.dart';
 import 'package:doanmobile/src/screens/main_app/pending_approval_screen.dart';
@@ -15,7 +16,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Sử dụng ChangeNotifierProvider để cung cấp AuthProvider cho toàn bộ cây widget
     return ChangeNotifierProvider(
       create: (ctx) => AuthProvider(),
       child: MaterialApp(
@@ -24,13 +24,15 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: const AuthWrapper(), // Màn hình điều hướng chính
+        home: const AuthWrapper(),
         routes: {
           '/home': (context) => const HomePage(),
           '/login': (context) => const LoginScreen(),
-          '/pending':(context) => const PendingApprovalScreen(),
+          '/pending': (context) => const PendingApprovalScreen(),
+          // SỬA LỖI: Thêm route cho màn hình quản lý menu
+          '/menu-management': (context) => const MenuManagementScreen(),
         },
-        debugShowCheckedModeBanner: false, // tắt debug banner
+        debugShowCheckedModeBanner: false,
       ),
     );
   }
@@ -45,25 +47,19 @@ class AuthWrapper extends StatelessWidget {
     return Consumer<AuthProvider>(
       builder: (context, auth, _) {
         if (!auth.isInitialized) {
-           // Nếu chưa khởi tạo xong, thử tự động đăng nhập
           auth.tryAutoLogin();
-          // và hiển thị màn hình chờ
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        // Nếu đã đăng nhập
         if (auth.isAuthenticated) {
-          // Nếu là user đang chờ duyệt
           if (auth.user!.role == 'PENDING_USER') {
             return const PendingApprovalScreen();
           } else {
-            // Nếu có quyền hợp lệ, vào trang chủ
             return const HomePage();
           }
         } else {
-          // Nếu chưa đăng nhập, hiển thị màn hình đăng nhập
           return const LoginScreen();
         }
       },

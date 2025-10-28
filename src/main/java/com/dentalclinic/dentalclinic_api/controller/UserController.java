@@ -7,6 +7,7 @@ import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dentalclinic.dentalclinic_api.dto.ChangePasswordRequest;
+import com.dentalclinic.dentalclinic_api.dto.PasswordResponse;
+import com.dentalclinic.dentalclinic_api.dto.UpdateStatusRequest;
 import com.dentalclinic.dentalclinic_api.dto.UserRequest;
 import com.dentalclinic.dentalclinic_api.dto.UserResponse;
 import com.dentalclinic.dentalclinic_api.service.UserService;
@@ -99,13 +103,47 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    // Cập nhật trạng thái bằng user id
+    // Cập nhật trạng thái user
     @PutMapping("{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> updateUserStatus(
             @PathVariable Long id,
-            @RequestBody Boolean isActive) {
-        UserResponse user = userService.updateUserStatus(id, isActive);
+            @Valid @RequestBody UpdateStatusRequest request) {
+        UserResponse user = userService.updateUserStatus(id, request.getActive());
         return ResponseEntity.ok(user);
     }
+
+    /**
+     * Đổi mật khẩu (User tự đổi)
+     * Endpoint: PUT /api/users/change-password
+     * Ai cũng có quyền đổi mật khẩu của chính mình
+     */
+    @PutMapping("/change-password")
+    public ResponseEntity<PasswordResponse> changePassword(
+            Authentication authentication,
+            @Valid @RequestBody ChangePasswordRequest request) {
+        String username = authentication.getName();
+        log.info("User {} yeu cau doi mat khau", username);
+        PasswordResponse response = userService.changePassword(username, request);
+        
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
+    /**
+     * Reset mật khẩu về mặc định (Admin only)
+     * Endpoint: PUT /api/users/{id}/reset-password
+     * Mật khẩu mặc định: password123
+     */
+    @PutMapping("/{id}/reset-password")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PasswordResponse> resetPassword(@PathVariable Long id) {
+        log.info("Admin yeu cau reset mat khau cho user ID: {}", id);
+        PasswordResponse response = userService.resetPasswordToDefault(id);
+        return ResponseEntity.ok(response);
+    }
 }
+

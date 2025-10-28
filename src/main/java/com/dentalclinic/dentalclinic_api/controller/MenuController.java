@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dentalclinic.dentalclinic_api.dto.MenuRequest;
 import com.dentalclinic.dentalclinic_api.dto.MenuResponse;
+import com.dentalclinic.dentalclinic_api.dto.UpdateMenuRolesRequest;
 import com.dentalclinic.dentalclinic_api.service.MenuService;
 
 import jakarta.validation.Valid;
@@ -107,6 +108,17 @@ public class MenuController {
     }
 
     /**
+     * GET /api/menus/all-for-management
+     * Alias cho hierarchy - để tương thích với frontend
+     */
+    @GetMapping("/all-for-management")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<MenuResponse>> getAllForManagement() {
+        List<MenuResponse> menus = menuService.getFullMenuHierarchy();
+        return ResponseEntity.ok(menus);
+    }
+
+    /**
      * GET /api/menus/{id}
      * Lấy chi tiết menu theo ID (Admin only)
      */
@@ -138,6 +150,19 @@ public class MenuController {
             @PathVariable Long id,
             @Valid @RequestBody MenuRequest request) {
         MenuResponse menu = menuService.updateMenu(id, request);
+        return ResponseEntity.ok(menu);
+    }
+
+    /**
+     * PUT /api/menus/{id}/roles
+     * Cập nhật roles cho menu (Admin only)
+     */
+    @PutMapping("/{id}/roles")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MenuResponse> updateMenuRoles(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateMenuRolesRequest request) {
+        MenuResponse menu = menuService.updateMenuRoles(id, request.getRoleNames());
         return ResponseEntity.ok(menu);
     }
 

@@ -22,8 +22,8 @@ import com.dentalclinic.dentalclinic_api.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Security configuration for JWT-based authentication.
- * Enables method-level security with @PreAuthorize.
+ * Cấu hình bảo mật cho ứng dụng sử dụng JWT.
+ * Kích hoạt bảo mật cấp phương thức với @PreAuthorize.
  */
 @Configuration
 @EnableWebSecurity
@@ -37,19 +37,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable) // Tắt CSRF
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll() // For H2 console in development
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/auth/**").permitAll() // Cho phép truy cập API auth
+                        .requestMatchers("/h2-console/**").permitAll() // Cho phép truy cập H2 console (chỉ dev)
+                        .anyRequest().authenticated() // Các yêu cầu khác cần xác thực
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Không lưu session
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // Allow H2 console frames (for development only)
+        // Cho phép frame H2 console (chỉ dev)
         http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
         return http.build();

@@ -1,397 +1,757 @@
-# Dental Clinic Management System - Backend API
+# 🦷 Dental Clinic Management System# Dental Clinic Management System - Backend API
 
-## 📋 Mô tả dự án
+Hệ thống quản lý phòng khám nha khoa với phân quyền người dùng, quản lý lịch hẹn, bệnh nhân và menu động.## 📋 Mô tả dự án
 
-Hệ thống quản lý phòng khám nha khoa với JWT Authentication, hỗ trợ quản lý lịch hẹn, bệnh nhân, và phân quyền người dùng.
+---Hệ thống quản lý phòng khám nha khoa với JWT Authentication, hỗ trợ quản lý lịch hẹn, bệnh nhân, và phân quyền người dùng.
 
-## 🛠 Công nghệ sử dụng
+## 📋 Tính năng## 🛠 Công nghệ sử dụng
 
-- **Backend**: Java 21, Spring Boot 3.5.6
-- **Security**: JWT (JSON Web Token)
-- **Database**: MSSQL Server
-- **Build Tool**: Maven
-- **ORM**: Hibernate/JPA
+### ✅ Đã hoàn thiện- **Backend**: Java 21, Spring Boot 3.5.6
 
-## 👥 Các vai trò trong hệ thống
+- **Authentication & Authorization**- **Security**: JWT (JSON Web Token)
 
-- **ADMIN**: Quản trị viên - toàn quyền truy cập
-- **DOCTOR**: Bác sĩ - xem lịch khám, tạo hồ sơ khám
-- **RECEPTIONIST**: Lễ tân - quản lý lịch hẹn, bệnh nhân, hóa đơn
+  - Đăng ký, đăng nhập với JWT- **Database**: MSSQL Server
+
+  - Phân quyền: Admin, Doctor, Receptionist, Viewer- **Build Tool**: Maven
+
+  - Refresh token mechanism- **ORM**: Hibernate/JPA
+
+- **Quản lý người dùng**## 👥 Các vai trò trong hệ thống
+
+  - CRUD người dùng
+
+  - Phân quyền động- **ADMIN**: Quản trị viên - toàn quyền truy cập
+
+  - Kích hoạt/vô hiệu hóa tài khoản- **DOCTOR**: Bác sĩ - xem lịch khám, tạo hồ sơ khám
+
+  - Quản lý thông tin cá nhân- **RECEPTIONIST**: Lễ tân - quản lý lịch hẹn, bệnh nhân, hóa đơn
+
 - **VIEWER**: Người dùng chỉ xem - role mặc định khi đăng ký
-- **PATIENT**: Bệnh nhân - chỉ là dữ liệu, không có quyền đăng nhập
 
-## 🚀 Cài đặt và chạy
+- **Quản lý menu động**- **PATIENT**: Bệnh nhân - chỉ là dữ liệu, không có quyền đăng nhập
 
-### Yêu cầu
+  - Menu phân cấp (hierarchy)
 
-- Java 21 trở lên
-- Maven 3.6+
-- **SQL Server 2019+** (Express, Developer, hoặc Standard)
+  - Phân quyền menu theo role## 🚀 Cài đặt và chạy
+
+  - CRUD menu items
+
+  - Mobile navigation drawer### Yêu cầu
+
+- **Quản lý lịch hẹn**- Java 21 trở lên
+
+  - Tạo, xem, cập nhật lịch hẹn- Maven 3.6+
+
+  - Trạng thái: Pending, Confirmed, Completed, Cancelled- **SQL Server 2019+** (Express, Developer, hoặc Standard)
+
+  - Filter theo trạng thái
 
 ### Setup Database MSSQL
 
-#### Bước 1: Tạo Database
+- **Quản lý bệnh nhân**
+
+  - CRUD thông tin bệnh nhân#### Bước 1: Tạo Database
+
+  - Lưu trữ: Họ tên, SĐT, email, địa chỉ, ngày sinh
 
 **Cách nhanh nhất:** Chạy file SQL script có sẵn
 
-1. Mở **SQL Server Management Studio (SSMS)**
-2. Connect vào SQL Server (server: `localhost` hoặc `.`)
-3. Mở file `setup-database.sql` trong project
-4. Nhấn **F5** để chạy script
+### 🚧 Đang phát triển
 
-Script sẽ tự động:
+- Hồ sơ bệnh án chi tiết1. Mở **SQL Server Management Studio (SSMS)**
 
-- ✅ Tạo database `DentalClinicDB`
+- Quản lý dịch vụ nha khoa2. Connect vào SQL Server (server: `localhost` hoặc `.`)
+
+- Quản lý hóa đơn3. Mở file `setup-database.sql` trong project
+
+- Báo cáo thống kê4. Nhấn **F5** để chạy script
+
+- Lịch làm việc của bác sĩ
+
+- Thông báo real-timeScript sẽ tự động:
+
+---- ✅ Tạo database `DentalClinicDB`
+
 - ✅ Tạo/reset login `sa` với password `admin123`
-- ✅ Gán quyền đầy đủ cho user
 
-**Chi tiết:** Xem file [DATABASE_SETUP.md](./DATABASE_SETUP.md) để biết thêm cách setup chi tiết, Windows Authentication, troubleshooting, v.v.
+## 🛠 Công nghệ- ✅ Gán quyền đầy đủ cho user
 
-#### Bước 2: Kiểm tra Connection
+### Backend**Chi tiết:** Xem file [DATABASE_SETUP.md](./DATABASE_SETUP.md) để biết thêm cách setup chi tiết, Windows Authentication, troubleshooting, v.v.
 
-Sau khi chạy script, kiểm tra:
+- **Java 21**
 
-```sql
-USE DentalClinicDB;
-GO
+- **Spring Boot 3.5.6**#### Bước 2: Kiểm tra Connection
 
--- Kiểm tra database đã tạo
-SELECT name FROM sys.databases WHERE name = 'DentalClinicDB';
-```
+  - Spring Security
 
-### Chạy ứng dụng
+  - Spring Data JPASau khi chạy script, kiểm tra:
+
+  - Spring Validation
+
+- **JWT Authentication**```sql
+
+- **MSSQL Server 2019+**USE DentalClinicDB;
+
+- **Maven 3.6+**GO
+
+### Frontend (Mobile)-- Kiểm tra database đã tạo
+
+- **Flutter 3.x**SELECT name FROM sys.databases WHERE name = 'DentalClinicDB';
+
+- **Dart**```
+
+- **HTTP Client** (dio)
+
+- **State Management** (Provider)### Chạy ứng dụng
+
+- **Material Design 3**
 
 ```bash
-mvn spring-boot:run
+
+---mvn spring-boot:run
+
 ```
+
+## 🚀 Cài đặt và Chạy
 
 Ứng dụng sẽ chạy tại: **http://localhost:8080**
 
-Khi chạy lần đầu, application sẽ **tự động**:
+### Yêu cầu
 
-- ✅ Tạo tất cả tables (users, roles, patients, appointments, menus, v.v.)
-- ✅ Insert 4 roles (ADMIN, DOCTOR, RECEPTIONIST, VIEWER)
-- ✅ Tạo admin user (username: `admin`, password: `admin123`)
+- Java JDK 21+Khi chạy lần đầu, application sẽ **tự động**:
+
+- Maven 3.6+
+
+- SQL Server 2019+ (Express/Developer/Standard)- ✅ Tạo tất cả tables (users, roles, patients, appointments, menus, v.v.)
+
+- Flutter 3.x (cho mobile app)- ✅ Insert 4 roles (ADMIN, DOCTOR, RECEPTIONIST, VIEWER)
+
+- IDE: IntelliJ IDEA / VS Code- ✅ Tạo admin user (username: `admin`, password: `admin123`)
+
 - ✅ Tạo menu phân quyền (chạy script `insert-menus.sql` trong SSMS)
+
+---
 
 ## 🔐 Tài khoản mặc định
 
+### 1. Setup Database
+
 ### Admin
 
+**Bước 1:** Mở SQL Server Management Studio (SSMS)
+
 - **Username**: `admin`
-- **Password**: `admin123`
 
-### Doctor (Demo)
+**Bước 2:** Connect vào SQL Server (`localhost` hoặc `.`)- **Password**: `admin123`
 
-- **Username**: `doctor1`
-- **Password**: `doctor123`
+**Bước 3:** Mở và chạy file `database.sql` (nhấn F5)### Doctor (Demo)
 
-### Receptionist (Demo)
+Script sẽ tự động:- **Username**: `doctor1`
 
-- **Username**: `receptionist1`
-- **Password**: `receptionist123`
+- ✅ Tạo database `DentalClinicDB`- **Password**: `doctor123`
 
-## 📡 API Endpoints
+- ✅ Tạo login `sa` / password `admin123`
+
+- ✅ Gán quyền đầy đủ### Receptionist (Demo)
+
+**Kiểm tra:**- **Username**: `receptionist1`
+
+sql- **Password**: `receptionist123`
+
+USE DentalClinicDB;
+
+SELECT name FROM sys.databases WHERE name = 'DentalClinicDB';## 📡 API Endpoints
 
 ### Authentication
 
+---
+
 #### Register New Account
 
+### 2. Cấu hình Backend
+
+````
 ```http
-POST /api/auth/register
+
+**File:** `src/main/resources/application.yml`POST /api/auth/register
+
 Content-Type: application/json
 
-{
-  "username": "newuser",
-  "password": "password123",
-  "email": "newuser@example.com",
-  "fullName": "Nguyễn Văn A",
-  "phoneNumber": "0912345678"
+```yaml
+
+spring:{
+
+  datasource:  "username": "newuser",
+
+    url: jdbc:sqlserver://localhost:1433;databaseName=DentalClinicDB;encrypt=false;trustServerCertificate=true  "password": "password123",
+
+    username: sa  "email": "newuser@example.com",
+
+    password: admin123  "fullName": "Nguyễn Văn A",
+
+```  "phoneNumber": "0912345678"
+
 }
-```
 
-**Response:**
+> **Lưu ý:** Nếu SQL Server dùng port khác, thay `1433` bằng port của bạn.```
 
-```json
+
+
+---**Response:**
+
+
+
+### 3. Chạy Backend```json
+
 {
-  "accessToken": "eyJhbGc...",
-  "refreshToken": "eyJhbGc...",
-  "tokenType": "Bearer",
-  "expiresIn": 86400,
+
+```bash  "accessToken": "eyJhbGc...",
+
+# Build và chạy  "refreshToken": "eyJhbGc...",
+
+mvn clean install  "tokenType": "Bearer",
+
+mvn spring-boot:run  "expiresIn": 86400,
+
   "user": {
-    "id": 4,
-    "username": "newuser",
-    "email": "newuser@example.com",
-    "fullName": "Nguyễn Văn A",
-    "roles": ["ROLE_VIEWER"]
-  }
-}
-```
 
-> **Lưu ý**: Người dùng đăng ký mới mặc định được gán role **ROLE_VIEWER** (chỉ có quyền xem). Admin có thể nâng cấp quyền sau.
+# Hoặc dùng script có sẵn (Windows)    "id": 4,
+
+.\run-api.bat    "username": "newuser",
+
+```    "email": "newuser@example.com",
+
+    "fullName": "Nguyễn Văn A",
+
+**Backend sẽ chạy tại:** http://localhost:8080    "roles": ["ROLE_VIEWER"]
+
+  }
+
+**Lần chạy đầu tiên, application tự động:**}
+
+- ✅ Tạo tất cả tables (Hibernate auto-ddl)```
+
+- ✅ Insert 5 roles (ADMIN, DOCTOR, RECEPTIONIST, VIEWER, PENDING_USER)
+
+- ✅ Tạo admin user (username: `admin`, password: `admin123`)> **Lưu ý**: Người dùng đăng ký mới mặc định được gán role **ROLE_VIEWER** (chỉ có quyền xem). Admin có thể nâng cấp quyền sau.
+
+- ✅ Tạo menu phân quyền
 
 #### Login
 
+---
+
 ```http
-POST /api/auth/login
+
+### 4. Chạy Mobile AppPOST /api/auth/login
+
 Content-Type: application/json
 
-{
-  "username": "admin",
-  "password": "admin123"
-}
-```
+```bash
 
-**Response:**
+# Di chuyển vào thư mục mobile{
+
+cd mobile  "username": "admin",
+
+  "password": "admin123"
+
+# Cài đặt dependencies}
+
+flutter pub get```
+
+
+
+# Chạy app (Android Emulator hoặc iOS Simulator)**Response:**
+
+flutter run
 
 ```json
-{
-  "accessToken": "eyJhbGc...",
-  "refreshToken": "eyJhbGc...",
+
+# Hoặc chạy trên device cụ thể{
+
+flutter run -d <device_id>  "accessToken": "eyJhbGc...",
+
+```  "refreshToken": "eyJhbGc...",
+
   "tokenType": "Bearer",
-  "expiresIn": 86400,
+
+**Cấu hình API Endpoint:**  "expiresIn": 86400,
+
   "user": {
-    "id": 1,
-    "username": "admin",
-    "email": "admin@dentalclinic.com",
-    "fullName": "Administrator",
-    "roles": ["ROLE_ADMIN"]
+
+File: `mobile/lib/src/core/services/menu_service.dart`    "id": 1,
+
+```dart    "username": "admin",
+
+static const String _baseUrl = 'http://10.0.2.2:8080/api'; // Android Emulator    "email": "admin@dentalclinic.com",
+
+// Hoặc 'http://localhost:8080/api' cho iOS Simulator    "fullName": "Administrator",
+
+```    "roles": ["ROLE_ADMIN"]
+
   }
-}
-```
+
+---}
+
+````
+
+## 🔐 Tài khoản mặc định
 
 #### Refresh Token
 
-```http
-POST /api/auth/refresh
-Content-Type: application/json
+| Username | Password | Role | Mô tả |
+
+|----------|----------|------|-------|```http
+
+| `admin` | `admin123` | ADMIN | Quản trị viên (full quyền) |POST /api/auth/refresh
+
+| `doctor1` | `doctor123` | DOCTOR | Bác sĩ (xem demo) |Content-Type: application/json
+
+| `receptionist1` | `receptionist123` | RECEPTIONIST | Lễ tân (xem demo) |
 
 {
-  "refreshToken": "eyJhbGc..."
+
+--- "refreshToken": "eyJhbGc..."
+
 }
-```
 
-#### Test Authentication
+## 📡 API Endpoints```
 
-```http
-GET /api/auth/me
-Authorization: Bearer {accessToken}
-```
+### Authentication#### Test Authentication
 
-### User Management (ADMIN only)
+````
 
-#### Get All Users
+POST   /api/auth/register   - Đăng ký tài khoản mới```http
 
-```http
-GET /api/users
-Authorization: Bearer {accessToken}
-```
+POST   /api/auth/login      - Đăng nhậpGET /api/auth/me
+
+POST   /api/auth/refresh    - Refresh tokenAuthorization: Bearer {accessToken}
+
+````
+
+### Users### User Management (ADMIN only)
+
+````
+
+GET    /api/users           - Lấy danh sách users (Admin)#### Get All Users
+
+GET    /api/users/{id}      - Chi tiết user
+
+POST   /api/users           - Tạo user mới (Admin)```http
+
+PUT    /api/users/{id}      - Cập nhật userGET /api/users
+
+DELETE /api/users/{id}      - Xóa user (Admin)Authorization: Bearer {accessToken}
+
+PUT    /api/users/{id}/status - Kích hoạt/vô hiệu hóa```
+
+````
 
 #### Get All Doctors (ADMIN, RECEPTIONIST)
 
-```http
-GET /api/users/doctors
-Authorization: Bearer {accessToken}
-```
+### Menus
 
-#### Get User by ID
+```````http
 
-```http
+GET    /api/menus                    - Menu của user (có phân quyền)GET /api/users/doctors
+
+GET    /api/menus/all-for-management - Tất cả menu (Admin)Authorization: Bearer {accessToken}
+
+POST   /api/menus                    - Tạo menu mới (Admin)```
+
+PUT    /api/menus/{id}               - Cập nhật menu (Admin)
+
+PUT    /api/menus/{id}/roles         - Cập nhật roles cho menu (Admin)#### Get User by ID
+
+DELETE /api/menus/{id}               - Xóa menu (Admin)
+
+``````http
+
 GET /api/users/{id}
-Authorization: Bearer {accessToken}
-```
 
-#### Create User
+### RolesAuthorization: Bearer {accessToken}
 
-```http
+```````
+
+GET /api/roles - Tất cả roles với metadata
+
+GET /api/roles/names - Chỉ tên roles (List<String>)#### Create User
+
+GET /api/roles/{id} - Chi tiết role
+
+````http
+
 POST /api/users
-Authorization: Bearer {accessToken}
-Content-Type: application/json
 
-{
-  "username": "doctor2",
-  "password": "password123",
-  "email": "doctor2@dentalclinic.com",
-  "fullName": "Bác sĩ Trần Văn B",
+### PatientsAuthorization: Bearer {accessToken}
+
+```Content-Type: application/json
+
+GET    /api/patients     - Danh sách bệnh nhân
+
+GET    /api/patients/{id} - Chi tiết bệnh nhân{
+
+POST   /api/patients     - Thêm bệnh nhân mới  "username": "doctor2",
+
+PUT    /api/patients/{id} - Cập nhật thông tin  "password": "password123",
+
+DELETE /api/patients/{id} - Xóa bệnh nhân  "email": "doctor2@dentalclinic.com",
+
+```  "fullName": "Bác sĩ Trần Văn B",
+
   "phoneNumber": "0987654321",
-  "roleNames": ["ROLE_DOCTOR"],
-  "active": true
-}
-```
 
-#### Update User
+### Appointments  "roleNames": ["ROLE_DOCTOR"],
 
-```http
-PUT /api/users/{id}
+```  "active": true
+
+GET    /api/appointments              - Danh sách lịch hẹn}
+
+GET    /api/appointments/{id}         - Chi tiết lịch hẹn```
+
+POST   /api/appointments              - Tạo lịch hẹn mới
+
+PUT    /api/appointments/{id}         - Cập nhật lịch hẹn#### Update User
+
+PUT    /api/appointments/{id}/status  - Cập nhật trạng thái
+
+DELETE /api/appointments/{id}         - Hủy lịch hẹn```http
+
+```PUT /api/users/{id}
+
 Authorization: Bearer {accessToken}
-Content-Type: application/json
 
-{
+**Authentication:** Tất cả endpoints yêu cầu `Authorization: Bearer <token>` (trừ register/login)Content-Type: application/json
+
+
+
+---{
+
   "username": "doctor2",
-  "email": "doctor2@dentalclinic.com",
+
+## 📂 Cấu trúc thư mục  "email": "doctor2@dentalclinic.com",
+
   "fullName": "Bác sĩ Trần Văn B Updated",
-  "phoneNumber": "0987654321",
-  "roleNames": ["ROLE_DOCTOR", "ROLE_ADMIN"],
-  "active": true
-}
-```
 
-#### Delete User
+```  "phoneNumber": "0987654321",
 
-```http
-DELETE /api/users/{id}
-Authorization: Bearer {accessToken}
-```
+Mobile-DentalClinic-Management/  "roleNames": ["ROLE_DOCTOR", "ROLE_ADMIN"],
 
-#### Assign Roles to User
+├── src/                             # Backend Spring Boot source code  "active": true
 
-```http
-PUT /api/users/{id}/roles
-Authorization: Bearer {accessToken}
-Content-Type: application/json
+│   ├── main/}
 
-["ROLE_DOCTOR", "ROLE_ADMIN"]
-```
+│   │   ├── java/.../dentalclinic_api/```
 
-## 📊 Database Schema
+│   │   │   ├── config/             # Configuration, Security
 
-### Tables
+│   │   │   ├── controller/         # REST Controllers#### Delete User
 
-- **users**: Thông tin người dùng (ADMIN, DOCTOR, RECEPTIONIST)
-- **roles**: Các vai trò trong hệ thống
-- **user_roles**: Bảng liên kết nhiều-nhiều giữa users và roles
-- **patients**: Thông tin bệnh nhân (không có quyền đăng nhập)
-- **appointments**: Lịch hẹn khám
+│   │   │   ├── dto/                # Data Transfer Objects
 
-### Entity Relationships
+│   │   │   ├── entity/             # JPA Entities```http
 
-```
-User (1) ----< (N) User_Roles (N) >---- (1) Role
-User (1) ----< (N) Appointments (Doctor)
-User (1) ----< (N) Patients (Created By)
+│   │   │   ├── enums/              # EnumerationsDELETE /api/users/{id}
+
+│   │   │   ├── exception/          # Exception HandlersAuthorization: Bearer {accessToken}
+
+│   │   │   ├── repository/         # JPA Repositories```
+
+│   │   │   ├── security/           # JWT, UserDetails
+
+│   │   │   └── service/            # Business Logic#### Assign Roles to User
+
+│   │   └── resources/
+
+│   │       ├── application.yml     # Configuration```http
+
+│   │       └── logback-spring.xml  # Logging configPUT /api/users/{id}/roles
+
+│   └── test/                       # Unit testsAuthorization: Bearer {accessToken}
+
+│Content-Type: application/json
+
+├── mobile/                          # Flutter Mobile App
+
+│   ├── lib/["ROLE_DOCTOR", "ROLE_ADMIN"]
+
+│   │   ├── main.dart               # Entry point```
+
+│   │   └── src/
+
+│   │       ├── core/## 📊 Database Schema
+
+│   │       │   ├── models/         # Data models
+
+│   │       │   └── services/       # API services### Tables
+
+│   │       ├── screens/            # UI screens
+
+│   │       │   ├── admin/          # Admin screens- **users**: Thông tin người dùng (ADMIN, DOCTOR, RECEPTIONIST)
+
+│   │       │   └── auth/           # Login, Register- **roles**: Các vai trò trong hệ thống
+
+│   │       └── widgets/            # Reusable widgets- **user_roles**: Bảng liên kết nhiều-nhiều giữa users và roles
+
+│   ├── pubspec.yaml                # Flutter dependencies- **patients**: Thông tin bệnh nhân (không có quyền đăng nhập)
+
+│   └── android/ ios/ web/          # Platform-specific- **appointments**: Lịch hẹn khám
+
+│
+
+├── database.sql                     # Database setup script### Entity Relationships
+
+├── pom.xml                          # Maven configuration
+
+├── README.md                        # This file```
+
+├── .gitignore                       # Git ignore rulesUser (1) ----< (N) User_Roles (N) >---- (1) Role
+
+└── Dental_Clinic_API.postman_collection.json  # API testsUser (1) ----< (N) Appointments (Doctor)
+
+```User (1) ----< (N) Patients (Created By)
+
 Patient (1) ----< (N) Appointments
-```
 
-## 🔒 JWT Configuration
+---```
 
-### Cấu hình trong application.yml
 
-```yaml
-jwt:
-  secret: MyVerySecureSecretKeyForDentalClinicManagementSystemAtLeast256BitsLong12345
-  expiration: 86400000 # 24 hours
+
+## 🧪 Testing## 🔒 JWT Configuration
+
+
+
+### Backend API với Postman### Cấu hình trong application.yml
+
+
+
+1. Import file `Dental_Clinic_API.postman_collection.json` vào Postman```yaml
+
+2. Đăng nhập để lấy JWT tokenjwt:
+
+3. Set token vào environment variable  secret: MyVerySecureSecretKeyForDentalClinicManagementSystemAtLeast256BitsLong12345
+
+4. Test các endpoints  expiration: 86400000 # 24 hours
+
   refresh-expiration: 604800000 # 7 days
+
+### Mobile App```
+
+
+
+```bash### Sử dụng JWT Token
+
+# Run tests
+
+cd mobileTất cả các endpoints (trừ `/api/auth/**`) yêu cầu JWT token trong header:
+
+flutter test
+
 ```
 
-### Sử dụng JWT Token
+# Run integration testsAuthorization: Bearer {your-jwt-token}
 
-Tất cả các endpoints (trừ `/api/auth/**`) yêu cầu JWT token trong header:
+flutter test integration_test```
 
-```
-Authorization: Bearer {your-jwt-token}
 ```
 
 ## ⚙️ Business Rules
 
+---
+
 ### Lịch hẹn (Appointments)
 
+## 📦 Build Production
+
 - Mỗi lịch hẹn mặc định 30 phút
-- Kiểm tra trùng giờ bác sĩ khi đặt lịch
+
+### Backend- Kiểm tra trùng giờ bác sĩ khi đặt lịch
+
 - Bệnh nhân phải hoàn thành lịch cũ mới đặt tiếp
-- Bác sĩ/Lễ tân có thể kết thúc lịch hẹn sớm
+
+```bash- Bác sĩ/Lễ tân có thể kết thúc lịch hẹn sớm
+
+mvn clean package -DskipTests
 
 ### Bệnh nhân (Patients)
 
-- Không có quyền đăng nhập
-- Được tạo bởi RECEPTIONIST hoặc ADMIN
+# JAR file sẽ được tạo trong target/
+
+java -jar target/dentalclinic-api-1.0.0.jar- Không có quyền đăng nhập
+
+```- Được tạo bởi RECEPTIONIST hoặc ADMIN
+
 - Lưu trữ thông tin y tế, dị ứng, tiền sử bệnh
+
+### Mobile
 
 ### Phân quyền
 
-- User có thể có nhiều roles
+```bash
+
+cd mobile- User có thể có nhiều roles
+
 - Mỗi endpoint có yêu cầu role riêng
-- Sử dụng `@PreAuthorize` để kiểm tra quyền
+
+# Android APK- Sử dụng `@PreAuthorize` để kiểm tra quyền
+
+flutter build apk --release
 
 ## 🧪 Testing với cURL
 
-### 1. Login
+# Android App Bundle
 
-```bash
-curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
+flutter build appbundle --release### 1. Login
+
+
+
+# iOS```bash
+
+flutter build ios --releasecurl -X POST http://localhost:8080/api/auth/login \
+
+```  -H "Content-Type: application/json" \
+
   -d '{"username":"admin","password":"admin123"}'
-```
 
-### 2. Get All Users (với token)
+---```
 
-```bash
-curl -X GET http://localhost:8080/api/users \
-  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
-```
 
-### 3. Create New Doctor
 
-```bash
+## 🐛 Troubleshooting### 2. Get All Users (với token)
+
+
+
+### Backend không connect được database```bash
+
+```curl -X GET http://localhost:8080/api/users \
+
+✗ Error: Login failed for user 'sa'  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+````
+
+**Fix:**
+
+1. Kiểm tra SQL Server đang chạy### 3. Create New Doctor
+
+2. Verify username/password trong `application.yml`
+
+3. Kiểm tra SQL Server Authentication mode (phải enable SQL Server Authentication)```bash
+
 curl -X POST http://localhost:8080/api/users \
-  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "doctor3",
-    "password": "password123",
-    "email": "doctor3@dentalclinic.com",
-    "fullName": "Bác sĩ Nguyễn C",
-    "roleNames": ["ROLE_DOCTOR"],
+
+### Mobile không gọi được API -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+
+````-H "Content-Type: application/json" \
+
+✗ Error: Connection refused  -d '{
+
+```    "username": "doctor3",
+
+**Fix:**    "password": "password123",
+
+- Android Emulator: Dùng `http://10.0.2.2:8080`    "email": "doctor3@dentalclinic.com",
+
+- iOS Simulator: Dùng `http://localhost:8080`    "fullName": "Bác sĩ Nguyễn C",
+
+- Real device: Dùng IP thật của máy (VD: `http://192.168.1.100:8080`)    "roleNames": ["ROLE_DOCTOR"],
+
     "active": true
-  }'
-```
 
-## 🔧 Troubleshooting
+### Port 8080 bị chiếm  }'
 
-### ❌ Lỗi: "Cannot connect to SQL Server"
+**Fix:** Thay đổi port trong `application.yml`:```
 
-**Nguyên nhân:** SQL Server không chạy hoặc TCP/IP chưa bật
+```yaml
 
-**Giải pháp:**
+server:## 🔧 Troubleshooting
 
-1. Kiểm tra SQL Server service đang chạy:
+  port: 8081
 
-   - Mở **Services** (Win + R → `services.msc`)
+```### ❌ Lỗi: "Cannot connect to SQL Server"
+
+
+
+---**Nguyên nhân:** SQL Server không chạy hoặc TCP/IP chưa bật
+
+
+
+## 📝 License**Giải pháp:**
+
+
+
+This project is licensed under the MIT License.1. Kiểm tra SQL Server service đang chạy:
+
+
+
+---   - Mở **Services** (Win + R → `services.msc`)
+
    - Tìm "SQL Server" → phải ở trạng thái "Running"
+
+## 👥 Team
 
 2. Bật TCP/IP trong SQL Server Configuration Manager:
 
-   - Mở **SQL Server Configuration Manager**
-   - SQL Server Network Configuration → Protocols for [Instance]
-   - TCP/IP → Right-click → Enable
-   - Restart SQL Server service
+**Đồ án môn Lập trình Mobile**
 
-3. Check port 1433 trong Windows Firewall:
+- Backend: Spring Boot + MSSQL   - Mở **SQL Server Configuration Manager**
+
+- Frontend: Flutter   - SQL Server Network Configuration → Protocols for [Instance]
+
+- University: [Tên trường]   - TCP/IP → Right-click → Enable
+
+- Year: 2025   - Restart SQL Server service
+
+
+
+---3. Check port 1433 trong Windows Firewall:
+
    ```bash
-   netstat -an | findstr 1433
-   ```
 
-### ❌ Lỗi: "Login failed for user 'sa'"
+## 📞 Contact   netstat -an | findstr 1433
 
-**Nguyên nhân:** SQL Authentication chưa bật hoặc password sai
+````
 
-**Giải pháp:**
+- **Email:** your.email@example.com
 
-1. Bật SQL Server Authentication:
+- **GitHub:** https://github.com/iLuminase/Mobile-DentalClinic-Management### ❌ Lỗi: "Login failed for user 'sa'"
 
-   - Mở SSMS → Connect vào server
-   - Right-click vào Server → Properties
-   - Security → chọn "SQL Server and Windows Authentication mode"
-   - Restart SQL Server service
+---**Nguyên nhân:** SQL Authentication chưa bật hoặc password sai
 
-2. Reset password cho 'sa':
-   - Chạy lại file `setup-database.sql`
-   - Hoặc chạy manual:
-   ```sql
-   ALTER LOGIN sa WITH PASSWORD = 'admin123';
-   ALTER LOGIN sa ENABLE;
-   ```
+## 📌 Version**Giải pháp:**
+
+**Current Version:** 1.0.01. Bật SQL Server Authentication:
+
+### Changelog - Mở SSMS → Connect vào server
+
+- Right-click vào Server → Properties
+
+#### v1.0.0 (2025-10-28) - Security → chọn "SQL Server and Windows Authentication mode"
+
+- ✅ JWT Authentication & Authorization - Restart SQL Server service
+
+- ✅ User Management (CRUD + Role assignment)
+
+- ✅ Dynamic Menu Management với phân quyền2. Reset password cho 'sa':
+
+- ✅ Patient Management - Chạy lại file `setup-database.sql`
+
+- ✅ Appointment Management - Hoặc chạy manual:
+
+- ✅ Mobile App với Navigation Drawer ```sql
+
+- ✅ API Documentation ALTER LOGIN sa WITH PASSWORD = 'admin123';
+
+- ✅ Database setup script ALTER LOGIN sa ENABLE;
+
+  ```
+
+  ```
+
+---
 
 ### ❌ Lỗi: "Cannot open database 'DentalClinicDB'"
+
+**Happy Coding! 🚀**
 
 **Nguyên nhân:** Database chưa được tạo
 
