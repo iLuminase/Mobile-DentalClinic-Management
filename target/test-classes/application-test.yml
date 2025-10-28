@@ -1,0 +1,18 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: test-client
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8080/test-realm
+
+# Disable OAuth2 auto-configuration for tests
+keycloak:
+  auth-server-url: http://localhost:8080
+  realm: test-realm
+  resource: test-client
+  credentials:
+    secret: test-secret
